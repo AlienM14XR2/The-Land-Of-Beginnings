@@ -23,6 +23,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
+#include "stdbool.h"
 
 // 毎回 printf() で 改行コードを入力するのは面倒だ。
 // テンプレート出力してくれる関数がほしい、これが欲求だ。
@@ -55,7 +56,7 @@ void test_strncpy() {
 void print_template( const char* message) {
     printf("%s \n",message);
     // int len = strlen(message);
-    // printf("ren is %d \n",len);
+    // printf("len is %d \n",len);
     // int size = len;
     // char buff[size];
     // for(int i = 0; i < size ; i++) {
@@ -92,9 +93,15 @@ void debug_f(const char* message, double debug) {
 void debug_print_s(const char* debug ) {
     printf("DEBUG: %s\n",debug);
 }
+void debug_s(const char* debug) {
+    debug_print_s(debug);
+}
 // だいたいここで気づく、これどうにかならないかなと。
-// 気分転換でエディタを替えてみた、少しだけ、vim 使ってみる。
+// つまり、型ごとにデバッグ出力用の関数を用意するのダルに普通はなる。
+// だから、みんな、printf 関数をそのまま使ってるんだね。
+// なんかもっといい方法あると思うけど、今はまだダメだな。
 //
+// 気分転換でエディタを替えてみた、少しだけ、vim 使ってみる。
 // すぐに、vim の賢さを知り驚く、何この子：）
 // 
 
@@ -216,6 +223,122 @@ void handson_5_3_1() {
     }
 }
 
+/**
+ * シグマ計算
+ * 1 + 2 + 3 + 4 + 5 + ..... 100 などを計算するのがシグマです。
+ * 公式は次のもの。
+ * (min + max) X (max - min + 1) / 2
+ *
+ * 2つの値（整数）は、scanf 関数で入力を受け付ける。
+ *
+ * */
+void handson_6() {
+    print_template("---------------- シグマ簡易計算  handson_6");
+    print_template("最小値と最大値（整数）を , で区切って入力してね：）");
+    int min = -1, max = -1, sum = -1;
+    int inleft = -1;
+
+    scanf("%d , %d", &inleft, &max);
+    if( inleft > max ) {
+        min = max;
+	max = inleft;
+    } else {
+        min = inleft;
+    }
+
+    sum = (min + max) * (max - min + 1) / 2;
+    printf("%d から %d までの合計値は %d です。\n", min, max, sum);
+}
+
+
+/**
+ * 文字コード表を引っ張り出したよ。
+ * これをつかったら、scanf を利用しても多少はましなプロブラムになるかな。
+ * 0を先頭に入力した際は8 進数の扱いに コンピュータではなるのだが、それは
+ * 無視します：）
+ *
+ * 10 進数　16進数　文字
+ * 48	    0x30	0
+ * 49	    0x31	1
+ * 50	    0x32	2
+ * 51	    0x33	3
+ * 52	    0x34	4
+ * 53	    0x35	5
+ * 54	    0x36	6
+ * 55	    0x37	7
+ * 56	    0x38	8
+ * 57	    0x39	9
+ * */
+
+bool check_6_3_1(const char* in) {
+    print_template("--------- 入力値が数値かどうかを判定する。 check_6_3_1");
+    debug_s(in);
+    int len = strlen(in);
+    debug_d("len is ",len);
+    int size = len + 1;
+    char buff[size];
+    strncpy(buff,in,size);
+    debug_s(buff);
+    
+    bool is_digit = 1;
+    for(int i = 0; i < len ;i++) {
+	debug_d("buff is ",(int)buff[i]);
+        if( buff[i] < 48 || buff[i] > 57) {
+	   is_digit = 0; 
+	}
+    }
+    return is_digit;
+}
+
+void test_check_6_3_1() {
+    print_template("---------- test_check_6_3_1 ");
+    printf("result is %d \n",check_6_3_1("1000"));
+
+    if( check_6_3_1("1000") ) {
+        int digit = atoi("1000");
+	debug_d("digit is ", digit);
+    }
+}
+
+void fatal_attack() {
+     printf("ドゴッ　ボゴッ　ダガガ　瞬　極　殺　！！！ \n");
+}
+
+void handson_6_3_1() {
+    print_template("----------------- handson_6_3_1");
+    print_template("定価を入力すると、1割引、3割引、5割引、8割引の値段を一覧表示するプロブラムを作成せよ。");
+
+    // 金額は整数の表示が望ましい、とのこと。
+    print_template("定価を入力してくださね。文字列とか止めてね、ブッ飛ばしますよ：）");
+
+    int sale_1 = -1, sale_3 = -1, sale_5 = -1, sale_8 = -1;
+    int in = -1;
+    char input[9];
+    for(int i = 0; i < 9 ;i++) {
+        input[i] = '\0';
+    }
+
+    scanf("%s",input);
+    int len = strlen(input);
+    debug_d("len is ", len);
+    if( len ) {
+       if(check_6_3_1(input)) {
+          int in = atoi(input);
+	  debug_d("in is ",in);
+	  sale_1 = (int)(in * 0.1);
+	  debug_d("sale_1 is ",sale_1);
+	  sale_3 = (int)(in * 0.3);
+	  sale_5 = (int)(in * 0.5);
+	  sale_8 = (int)(in * 0.8);
+	  printf("sale1 is %d, sale3 is %d, sale5 is %d, sale8 is %d \n",in-sale_1,in-sale_3,in-sale_5,in-sale_8);
+
+       } else {
+           fatal_attack();
+       }
+    } else {
+        fatal_attack();
+    }
+}
 
 int main(void) {
     printf("START =============== \n");
@@ -242,7 +365,13 @@ int main(void) {
     sample_number_of_digits();
 
     handson_5_3_1();
-    
+    //
+    // ここから6章
+    //
+    // handson_6();
+    handson_6_3_1();
+    // test_check_6_3_1();
+
     printf("=============== END \n");
     return 0;
 }
