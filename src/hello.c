@@ -70,6 +70,22 @@ void print_template( const char* message) {
 void debug_print_d(const char* message, int debug) {
     printf("DEBUG: %s\t %d\n",message, debug);
 }
+
+void debug_d(const char* message, int debug) {
+    debug_print_d(message, debug);
+}
+
+/**
+ * デバッグ double を出力する。
+ * */
+void debug_print_f(const char* message, double debug) {
+    printf("DEBUG: %s\t %f\n",message, debug);
+}
+
+void debug_f(const char* message, double debug) {
+    debug_print_f(message, debug);
+}
+
 /**
  * デバッグ const char* を出力する。
 */
@@ -137,9 +153,70 @@ void coffee_break() {
     printf("1.03 X 9 = %f\n", 1.03 * 9);
     print_template("次の出力は指定子を整数にしたもの、どんな変化になるのかな？");
     // コンパイルエラーとなった、コンパイラにはdouble を予期してたのに、int だと叱られた。
-    // printf("1.03 X 9 = %d", 1.03 * 9);
-
+    // なら、cast だな、これでどうなるか見てみよう。
+    printf("1.03 X 9 = %d\n", (int)(1.03 * 9));
+    print_template("これが出力されていれば、それは cast によるためだ。");
 }
+
+/**
+ * 数字の桁数の printf 関数における表現方法です。
+ * 
+ * - 5 桁で表現してみる。
+ * - 数値の余分な桁を任意の文字で埋める。
+ *
+ * */
+void sample_number_of_digits() {
+    print_template("--------------- sample_number_of_digits ");
+    int a = 10000, b = 500, c = 3;
+
+    printf("a is %5d \n",a);
+    printf("b is %5d \n",b);
+    printf("c is %5d \n",c);
+
+    printf("a is %05d \n",a);
+    printf("b is %05d \n",b);
+    printf("c is %05d \n",c);
+
+    // 実数の場合、%6.2f では、整数部分が3桁、少数点が1桁、少数部分
+    // が2桁の6桁と解釈される。
+    double pi = 3.14159;
+    printf("src is 3.14159 but...\t  %6.2f \n",pi);
+    printf("src is 3.14159 but...\t 123456 \n");
+}
+
+/**
+ * 1本198円の清涼飲料水1本と、1本138円の牛乳2本を購入し
+ * 千円で払った場合のお釣りを求めよ。
+ * ただし、5% の消費税を追加し、お釣りの額は整数とする。
+ * 消費税を四捨五入するかどうかは自由とする。
+ *
+ * 2つ作って確認してみる。 upper, lower
+ *
+ * */
+void handson_5_3_1() {
+    print_template("------------ handson_5_3_1");
+    int juice = 198;
+    int milk  = 138;
+    
+    int sum = juice + (milk*2);
+    debug_print_d("sum is ",sum);
+    double tax = sum * 0.05;
+    debug_print_f("tax(double) is ",tax);
+    int tax_low = (int)tax;
+    debug_print_d("tax_low is ",tax_low);
+    debug_print_d("sum(tax_low) is ",sum + tax_low);
+    debug_d("answer is ", 1000 - (sum + tax_low));
+
+    int rem = (int)((tax - tax_low)*100);
+    debug_print_d("rem is ",rem);
+    if( rem > 40 ) {
+         tax_low++;
+	 debug_d("sum(tax_up) is ",sum + tax_low);
+	 debug_d("answer is ", 1000 - (sum + tax_low));
+    }
+}
+
+
 int main(void) {
     printf("START =============== \n");
     printf("Hello C. \t I had came back. \n");
@@ -162,9 +239,10 @@ int main(void) {
     sample_Numbers_Floating_Point_Method();
     handson_3_1();
     coffee_break();
+    sample_number_of_digits();
 
+    handson_5_3_1();
+    
     printf("=============== END \n");
     return 0;
 }
-
-
