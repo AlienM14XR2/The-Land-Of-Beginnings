@@ -1,5 +1,6 @@
 *.swo
 *.swp
+*.c.*
 
 # Prerequisites
 *.d
