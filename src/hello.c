@@ -339,6 +339,70 @@ void handson_6_3_1() {
         fatal_attack();
     }
 }
+/**
+ * 7_3_1
+ *
+ * 西暦年を入力すると、その年にオリンピックが開かれるか、表示する
+ * プログラムを作成せよ。
+ * 可能なら、夏季と冬季の区別も表示できればなお良い。
+ * ヒント：シドニー五輪（夏）は2000年開催であった。
+ *
+ * 条件がややこしくなるので、以前夏季と冬季が同じ年だった時期のことは無視する。
+ * 
+ * うん、色々と想像できる。
+
+ 4年毎に開催される。
+
+ 1896 年、ギリシャのアテネ　これが初開催、つまりこれ以前はなかった。
+ 1924 年	シャモニー・モンブラン　これが初開催、これ以前はなかった。
+
+ 関数は2つ作ろう。
+ 
+ 先生ごめん、おれはもう scanf 関数は使わないよ。実行時の入力がダルいから。
+ 
+ calc_summer_olympic
+ calc_winter_olympic
+ 定数を変えれば使い回せるかも。
+ 1994 このとしから、冬季オリンピックの数え方が変わってる、ちくしょーー。
+ * */
+int calc_olympic_year(const int start, const int year) {
+    print_template("-------------- calc_olympic_year ");
+    if(year < start) {
+        print_template("ブッブー、間違ってるよ。その年はまだ開催されてないよ。");
+        return -1;
+    }
+    int calc = -1;
+    if(start == 1924 && year >= 1994) {	// 冬季オリンピックめ、何変えてくれてんだよ。
+        calc = 1994;
+    }else {
+	calc = start;
+    }
+    while(calc < year) {
+        calc += 4;
+    }
+    debug_d("your input year is ", year);
+    debug_d("calc is ",calc);
+    if(calc == year) {
+        print_template("Yes Correct Answer, It's a Olympic year.");	// 今さらなんだけど、なんでこの関数名 println にしなかったのかな。
+    } else {
+        print_template("No.");
+    }
+    return 0;
+}
+void test_calc_olympic_year() {
+    print_template("-------------------------- test_calc_olympic_year ");
+    const int start_summer = 1896;
+    const int start_winter = 1924;
+    calc_olympic_year(start_summer, 1002);
+    calc_olympic_year(start_summer, 1896);
+    calc_olympic_year(start_summer, 2000);
+    calc_olympic_year(start_summer, 2020);
+    calc_olympic_year(start_winter, 1924);
+    calc_olympic_year(start_winter, 1928);
+    calc_olympic_year(start_winter, 1992);
+    calc_olympic_year(start_winter, 1994);
+    calc_olympic_year(start_winter, 2022);
+}
 
 int main(void) {
     printf("START =============== \n");
@@ -371,6 +435,13 @@ int main(void) {
     // handson_6();
     handson_6_3_1();
     // test_check_6_3_1();
+    
+
+    //
+    // 7 章
+    // 等値演算子、関係演算子、論理演算子
+    //
+    test_calc_olympic_year();
 
     printf("=============== END \n");
     return 0;
