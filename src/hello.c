@@ -63,6 +63,10 @@ void print_template( const char* message) {
     //     buff[i] = '\0';
     // }
 }
+
+void println(const char* message) {
+    print_template(message);
+}
 // DEBUG 用もほしい。
 
 /**
@@ -304,13 +308,18 @@ void fatal_attack() {
      printf("ドゴッ　ボゴッ　ダガガ　瞬　極　殺　！！！ \n");
 }
 
-void handson_6_3_1() {
+void handson_6_3_1(const char* your_in) {
     print_template("----------------- handson_6_3_1");
     print_template("定価を入力すると、1割引、3割引、5割引、8割引の値段を一覧表示するプロブラムを作成せよ。");
 
     // 金額は整数の表示が望ましい、とのこと。
     print_template("定価を入力してくださね。文字列とか止めてね、ブッ飛ばしますよ：）");
-
+    if(1) {
+        int len = strlen(your_in);
+	if(len > 8) {
+	    fatal_attack();
+	}
+    }
     int sale_1 = -1, sale_3 = -1, sale_5 = -1, sale_8 = -1;
     int in = -1;
     char input[9];
@@ -318,7 +327,8 @@ void handson_6_3_1() {
         input[i] = '\0';
     }
 
-    scanf("%s",input);
+    // scanf("%s",input);	// 章が進んでいちいち入力するのがウザくなった。
+    strncpy(input,your_in,8);
     int len = strlen(input);
     debug_d("len is ", len);
     if( len ) {
@@ -404,6 +414,84 @@ void test_calc_olympic_year() {
     calc_olympic_year(start_winter, 2022);
 }
 
+/**
+ * 月（整数値）を入力すると、対応する陰暦の月を表示するプログラムを作成せよ。
+ * なお、存在しない月を入力した時にも何らかのメッセージを表示せよ。
+ *
+ * ヒント：陰暦は1月から順番に、
+ * 睦月
+ * 如月
+ * 弥生
+ * 卯月
+ * 皐月
+ * 水無月
+ * 文月
+ * 葉月
+ * 長月
+ * 神無月
+ * 霜月
+ * 師走
+ * 。
+ * */
+void handson_8_3_1(const int month) {
+    println("--------------- handson_8_3_1");
+    switch (month) {
+        case 1 :
+	    debug_d("睦月です。", month);
+	    break;
+        case 2 :
+	    debug_d("如月です。", month);
+	    break;
+        case 3 :
+	    debug_d("弥生です。", month);
+	    break;
+	case 4 :
+	    debug_d("卯月です。", month);
+	    break;
+	case 5 :
+	    debug_d("皐月です。", month);
+	    break;
+	case 6 :
+	    debug_d("月は水無月です。", month);
+	    break;
+	case 7 :
+	    debug_d("文月です。", month);
+	    break;
+	case 8 :
+	    debug_d("葉月です。", month);
+	    break;
+	case 9 :
+	    debug_d("長月です。", month);
+	    break;
+	case 10 :
+	    debug_d("神無月です。", month);
+	    break;
+	case 11 :
+	    debug_d("霜月です。", month);
+	    break;
+	case 12 :
+	    debug_d("師走です。", month);
+	    break;
+	default :
+	    println("そんな月はない。（タモリ風で");
+    }
+}
+void test_handson_8_3_1() {
+    println("------------------- test_handson_8_3_1");
+    handson_8_3_1(1);
+    handson_8_3_1(2);
+    handson_8_3_1(3);
+    handson_8_3_1(4);
+    handson_8_3_1(5);
+    handson_8_3_1(6);
+    handson_8_3_1(7);
+    handson_8_3_1(8);
+    handson_8_3_1(9);
+    handson_8_3_1(10);
+    handson_8_3_1(11);
+    handson_8_3_1(12);
+    handson_8_3_1(0);
+}
 int main(void) {
     printf("START =============== \n");
     printf("Hello C. \t I had came back. \n");
@@ -433,7 +521,7 @@ int main(void) {
     // ここから6章
     //
     // handson_6();
-    handson_6_3_1();
+    handson_6_3_1("10000000");
     // test_check_6_3_1();
     
 
@@ -442,6 +530,28 @@ int main(void) {
     // 等値演算子、関係演算子、論理演算子
     //
     test_calc_olympic_year();
+    
+    //
+    // 8 章
+    // 場合分け処理を行う。
+    // if の　else。　else if、switch case 文は変数と整数値の比較にしか
+    // 利用できない。
+    //
+    println("switch (変数): { ");
+    println("case 1: ");
+    println("    処理1;");
+    println("    処理2;");
+    println("    break;");
+    println("case 2: ");
+    println("case 3:");
+    println("    ・・・;");
+    println("    break;");
+    println("default:");
+    println("    ・・・;");
+    println("    break;");
+    println("}");
+    
+    test_handson_8_3_1();
 
     printf("=============== END \n");
     return 0;
