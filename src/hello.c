@@ -492,6 +492,58 @@ void test_handson_8_3_1() {
     handson_8_3_1(12);
     handson_8_3_1(0);
 }
+
+/**
+ * for 文を使用して、掛け算九九表を表示するプログラムを作成せよ。
+ *
+ * ヒント： %2d 指定子を使うと表を揃えられる。
+ * ヒント： for 文の中でfor 文を使っても良い（優しいね、先生：）
+ * 
+ **/
+void handson_9_3_1() {
+    println("--------------九九表（出たな定番：） handson_9_3_1");
+    for(int i=1; i < 10 ; i++) {
+        for(int j=1; j < 10 ;j++) {
+	    printf("%2d |", i*j);
+	}
+	printf("\n");
+    }
+}
+
+/**
+ * テストの点数を入力するプログラムを作りなさい。
+ * ただし、テストの点数は0 から 100 までしかないので、
+ * それ以外が入力された場合には再入力させるようにすること。
+ *
+ * do while 文と scanf関数なんだろうが、前述のように、以降がダルい。
+ * したがって、ゴメンナサイ、先生。俺、パターンテストで許してつかーさい。
+ * */
+int handson_10_3_1(int score) {
+    println("----- handson_10_3_1");
+    do {
+        if(score < 0) {
+	    println("0より小さいのダメだよ。（マイナス");
+	    return -1;
+	} else if(score > 100) {
+            println("100 より大きいのダメだよ。（オーバー");
+	    return -1;
+	}
+    } while(0);
+    printf("input score is %3d \n",score);
+    return 0;
+}
+
+void test_handson_10_3_1() {
+    println("------------- test_handson_10_3_1");
+    // 正常系
+    handson_10_3_1(100);
+    // 異常系（マイナス）
+    handson_10_3_1(-1);
+    // 異常系（オーバー）
+    handson_10_3_1(1000);
+}
+
+
 int main(void) {
     printf("START =============== \n");
     printf("Hello C. \t I had came back. \n");
@@ -553,6 +605,23 @@ int main(void) {
     
     test_handson_8_3_1();
 
+    //
+    // 9 章
+    // for ループ
+    //
+    handson_9_3_1();
+
+    //
+    // 10 章
+    // while 文
+    // do while 文 scanf 関数との併用で入力チェックをスキなだけできる。
+    //
+    //【これは豆知識】うん、Trivia か。
+    // コンピュータの世界では、円周率を3.14159で計算します。
+    // これは、その次の桁まで表すと、3.141592、となり、
+    // 9と2の間で切り捨てても、誤差が大きくならないからです。
+    //
+    test_handson_10_3_1();
     printf("=============== END \n");
     return 0;
 }
