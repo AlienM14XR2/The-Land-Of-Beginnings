@@ -17,6 +17,7 @@
 
 #include "stdio.h"
 #include "stdlib.h"
+#include "memory.h"
 
 void println(const char* message) {
     printf("%s \n", message);
@@ -86,6 +87,63 @@ int olympic(int year)
 }
  * */
 
+// 静的なローカル変数の説明用、リファレンスから流用した。
+int count_func(void);
+
+void sample_sizeof(void) {
+    println("----------- sample_sizeof");
+    int numbers[] = {33,3,9,99,102};
+    debug_d("これが、今回のクリティカルヒット。sizeof(numbers) is ", sizeof(numbers));
+    debug_d("同じくここもね。sizeof(numbers[0] is )", sizeof(numbers[0]));
+    // このように変数に格納して利用すれば無駄が省ける。
+    // 先生は今のマシンは高性能と言っていたが、これが大事なこともある。
+    // int loop_count = sizeof(numbers)/sizeof(numbers[0]);
+
+    for(int i = 0; i < sizeof(numbers)/sizeof(numbers[0]) ;i++) {
+        debug_d("numbers is ", numbers[i]);
+    }
+}
+
+/* *
+ * 注意だよ。
+ * memcpy は コピー元の配列がコピー先の配列より長くても、お構いなくコピー
+ * しようとする、それを一般にはバッファオーバーフローと呼ぶぞ。
+ * さらに、運が悪ければ、バッファオーバランに発展しかねない恐怖があるぞ。
+ *
+ * そういう所にいると理解しながら、一歩を踏みしめ、前へ進む。
+ * */
+void sample_memcpy(void) {
+    println("---------------- sample_memcpy");
+    int nums_1[] = {42,79,13,19,41};
+    int nums_2[] = {1,2,3,4,5};
+    int loop_nums_2 = sizeof(nums_2)/sizeof(nums_2[0]);
+    debug_d("loop_nums_2 is ", loop_nums_2);
+    for(int i = 0; i < loop_nums_2; i++) {
+        debug_d("before nums_2 is ", nums_2[i]);
+    }
+    // nums_1 の全要素をコピーする。
+    memcpy(nums_2, nums_1, sizeof(nums_1));
+    for(int i = 0; i < loop_nums_2; i++) {
+        debug_d("after nums_2 is ", nums_2[i]);
+    }
+}
+/**
+ * 入力された、10個の数値を最後から表示するプログラムを作成せよ。
+ *
+ * */
+void handson_13_3_1(void) {
+    println("----------- handson_13_3_1");
+    int nums[10] = {1,2,3,4,5,6,7,8,9};	// 9個しか初期化してない、敢えてね。
+    int loop = sizeof(nums)/sizeof(nums[0]);
+    debug_d("loop is ", loop);
+    
+    int i = loop - 1;
+    do {
+        debug_d("nums is ", nums[i]);
+        i--;
+    }while(i >= 0);
+}
+
 int main(void) {
     //
     // 11 章　関数
@@ -108,10 +166,46 @@ int main(void) {
     //
     // 12 章　変数の寿命
     // ローカル変数の場合。
+    // グローバル変数と同名のローカル変数ではローカル変数が優先されるのです。
+    // static ローカル変数を学習した。
     //
+    count_func();
+    count_func();
+    count_func();
+
     //
+    // 13 章　配列
+    //
+    // 正直に言えば、C++で手を焼いた。
+    // Cにおけるそれは、どんなものなのか、しっかりと学びたい。
+    //
+    // ※ いまさら感が半端ないけど、コメント以外のソース部分に全角スペースが
+    // あると、もちろんコンパイルエラーとなる、vim を利用しているそこの君、
+    // 気をつけ給えよ。
+    // 
+    // sizeof 演算子
+    // sizeof(変数や配列名) 
+    // これは実際に使ってみたい。
+    //
+    // memcpy 関数
+    // 配列のコピーを行ってくる。
+    // memory.h が必要。
+    //
+    sample_sizeof();
+    sample_memcpy();
+    handson_13_3_1();
+        
     return 0;
 }
+int count_func(void) {
+    static int count;   /* 静的なローカル変数 初期化しなくても始めの値は0 プログラム終了まで残る。　これが、ローカル static 変数。*/
+
+    // static int count = 0; // これでも動作は問題なかった。
+    count++;
+    debug_d("static int count is ", count);
+    return count;
+}
+
 int sum_sigma(const int min, const int max) {
     return (min + max) * (max - min) / 2;
 }
