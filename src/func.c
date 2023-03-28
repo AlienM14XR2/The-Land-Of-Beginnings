@@ -18,6 +18,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "memory.h"
+#include "string.h"
 
 void println(const char* message) {
     printf("%s \n", message);
@@ -27,8 +28,12 @@ void debug_d(const char* message, const int digit) {
     printf("DEBUG: %s \t %d \n",message, digit);
 }
 
-void debug_f(const char* message, const double f){
+void debug_f(const char* message, const double f) { 
     printf("DEBUG: %s \t %f \n",message, f);
+}
+
+void debug_c(const char* message, const char c) {
+    printf("DEBUG: %s \t %c \n", message, c);
 }
 
 // sum 関数のプロトタイプ宣言
@@ -144,6 +149,42 @@ void handson_13_3_1(void) {
     }while(i >= 0);
 }
 
+void sample_sprintf(void) {
+    println("------------ sample_sprintf");
+    // 思い出してきた。こいつは、確かに便利だよね。
+    char result[256];
+    for(int i=0; i < 256 ;i++){
+        result[i] = '\0';
+    }
+
+    char dragon[12] = "Dragon";
+    char quest[]    = "Quest";
+    int number      = 3;
+    // なるほど、先生はその世代か。
+    sprintf(result, "%s%s %d\n", dragon, quest, number);
+    //printf(result);	// 先生の書き方は warning になったよ。
+    printf("result is %s",result);
+    // うん、うん、こいつは便利だね：）
+}
+
+// プロトタイプ宣言教えてもらったのに使ってない：）
+void sample_strcmp(void) {
+    println("---------- sample_strcmp");
+    char dragon[] = "Dragon";
+    char sample[] = "dragon";
+    char sample2[] = "Dragon";
+    
+    if( strcmp(dragon, sample) == 0 ) {
+        printf("%s, %s is same.\n", dragon, sample);
+    } else {
+	printf("%s, %s is not same.\n",dragon, sample);
+    }
+    if(strcmp(dragon, sample2) == 0) {
+        printf("%s, %s is same.\n", dragon, sample2);
+    } else {
+        printf("%s, %s is not same.\n", dragon, sample2);
+    }
+}
 int main(void) {
     //
     // 11 章　関数
@@ -194,7 +235,79 @@ int main(void) {
     sample_sizeof();
     sample_memcpy();
     handson_13_3_1();
-        
+    
+    //
+    // 14 章　文字列
+    //
+    // マルチバイトつまり、日本語には wchar_t型が用意されている。
+    // しかし、先生は厳格だ、まずは基本ということでここでは扱わないといっている。
+    // 
+    // ctype.h を #include
+    // isalnum A-Z a-z 0-9
+    // isdigit 0-9
+    // isxdigit A-F a-f 0-9
+    // isalpha A-Z a-z
+    // isupper A-Z
+    // islower a-z
+    // ispunct 記号 !"#$
+    // isspace 0x09-0x0D 0x20:
+    //
+    // stdlib.h を #include
+    // atoi 関数　文字列を数値に変換した結果を返す。
+    // atof 関数　文字列を実数に変換した結果を返す。
+    //
+    // string.h を #include
+    // strcpy(dest,src);
+    // strncpy(dest,src,size); // この関数はEOS '\0' ヌル文字が入らない可能性があるので注意が必要だったね。
+    // strcat(元の文字列が記憶された配列、追加する文字列の記憶された配列)
+    //
+    // 文字列リテラルであれば"Foo""Bar" で連結できる。
+    //
+    // 文字列が混乱を来す要因の一つがそれが示すものが複数ある点だろうな。
+    // 上記で言えば、数値も扱えてします。
+    //
+    // stdio.h
+    // sprintf(結果を記憶する配列、書式文字列、各種変数・・・)
+    // 確かにこんなのあったな、完全に忘却の彼方にあったが。
+    // これは、サンプリングしてみよう。
+    //
+    // scanf 関数で、変数に & をつけない理由について、
+    // 以下、先生の言葉。
+    // 配列は、C言語の本質であるポインタそのものであるからです。
+    // これはC言語の根底をなす重要なことであるため、
+    // 後々じっくりと時間をとって、たっぷりと説明いたします。
+    //
+    // これだよ、俺がC++ で感じた違和感、C++ はもっと厳密的に型をみていると思う。
+    // 実を言えば俺も先生と同じ考え、同じ教えを最初の C で学んだ。
+    // 配列がC++でしっくりこなかったのもおそらくこれじゃないかな。
+    // 配列使わないで、コンテナ使おって思ったし。
+    // C はその辺がニアリーイコールで C++ は違うもの。というのが今の自分の見解。
+    // いや、自分の理解がC/C++双方で弱いと感じたのが配列なのだね。 
+    // やはり、圧倒的なコード量が足らないか、配列は。
+    // 忘れないとは思うが、念の為に。
+    // TODO 配列のポインタで次を確認すること。これは、ポインタの章が楽しみだ。
+    // char doragon[] = "Dragon";
+    // char* pc = dragon;
+    // char* pc2 = &dragon[0];
+    // pc と pc2 が同じアドレスを指しているのか？
+    // 予想は同じだ。
+    //
+    // char str[32];
+    // scanf("%32s", str);
+    // こんなテクニックあったのか、これでオーバーフローしないよね。
+    // 問題点もあるのか、うん、スペースの入力ができないのね。
+    //
+    // strlen string.h
+    // 文字列の長さを返却する。
+    //
+    // strcmp string.h
+    // 文字列を比較する。
+    // うん、これはサンプリングする。
+    //
+    debug_c("これで私はcharもデバッグできるようになったぞ。A is ",'A');
+    debug_d("こんなこともできたはずだ。A is ",'A');
+    sample_sprintf();
+    sample_strcmp();
     return 0;
 }
 int count_func(void) {
