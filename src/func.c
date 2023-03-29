@@ -185,6 +185,16 @@ void sample_strcmp(void) {
         printf("%s, %s is not same.\n", dragon, sample2);
     }
 }
+
+/**
+ * ２つの文字列を仮引数にとり、結合して表示する関数です。
+ * */
+int handson_14_3_1(const char*, const char*);
+/**
+ * 上記関数のテスト関数ですな。
+ * どうだ、プロトタイプ宣言使ってぞ：）最後だしな。
+ * */
+void test_handson_14_3_1(void);
 int main(void) {
     //
     // 11 章　関数
@@ -229,7 +239,7 @@ int main(void) {
     // これは実際に使ってみたい。
     //
     // memcpy 関数
-    // 配列のコピーを行ってくる。
+    // 配列のコピーを行ってくれる。
     // memory.h が必要。
     //
     sample_sizeof();
@@ -308,8 +318,37 @@ int main(void) {
     debug_d("こんなこともできたはずだ。A is ",'A');
     sample_sprintf();
     sample_strcmp();
+    test_handson_14_3_1();
     return 0;
 }
+
+int handson_14_3_1(const char* lc, const char* rc) {
+    println("---------------- handson_14_3_1");
+    // strcat, strcpy, strncpy, sprintf || 完全自作 どれを採用しよ：）
+    // strcat でやってみる。バッファオーバーフローに注意と。
+    int llen = strlen(lc);
+    int rlen = strlen(rc);
+    debug_d("llen is ", llen);
+    debug_d("rlen is ", rlen);
+    int size = llen + rlen + 1;
+    char buff[size];
+    for(int i = 0; i < size ;i++) {
+        buff[i] = '\0';
+    }
+
+    strcat(buff,lc);
+    strcat(buff,rc);
+    printf("result is %s\n",buff);
+
+    return 0;
+}
+
+void test_handson_14_3_1(void) {
+    println("------------------------------ test_handson_14_3_1");
+    handson_14_3_1("Alice","RedGrave");
+}
+
+
 int count_func(void) {
     static int count;   /* 静的なローカル変数 初期化しなくても始めの値は0 プログラム終了まで残る。　これが、ローカル static 変数。*/
 
