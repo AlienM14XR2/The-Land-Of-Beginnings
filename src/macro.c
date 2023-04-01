@@ -94,13 +94,86 @@
     ENUM_7,
     ENUM_9 = 9,
  };
-  
+ 
+ 
+ 簡易的な関数の実現 
+ ＃define疑似命令による定数は、単なる置き換えによって実現されていますが、
+ これを利用すると特殊な処理を行わせることも可能です。
+ たとえば、変数の中身を画面に表示するにはprintf文を次のように使用します。
+ 
+ 
+ enumに数値を指定
+ printf("temp = %d\n", temp);
+ 
+ しかし、変数tempの値をあちこちで表示する必要がある場合に、
+ この文を毎回打ち込むのが面倒であれば、
+ ＃define疑似命令で置き換えることができます。
+ 
+ #define PRINT_TEMP printf("temp = %d\n", temp)
+ 
+ うん、ひとつ試してみるか。
+ オレは余り他の言語でも利用しない、グローバル変数というもので、これを実装してみるよ。
+ 
+ マクロ関数だったかな？
+ これは、あらゆるプログラムを強引にまとめることができる、非常に強力な機能です。
+ しかし、上記のテクニックを乱用すると、プログラムが省略表現だらけになってしまって、
+ 最初にプログラムを書いた人にしか読めなくなってしまうので、十分に注意して使用する
+ 必要があります。
+ 
+ 余談、オレが C++ で AOP を調べていた時にこのマクロ関数で AOP の代替にしていたと記憶
+ している。確かに、これなら AOP いらないかとも思った。意味合いは、ポイントカットなので
+ 後付がいくらでもできる。どんな処理をポイントカット先で行いたいのか？といことなので
+ 使い方は実装者次第だ。
+ 
+ C++ は C との互換がある、したがって、プログラマが C 寄りか OOP クラスを多用するかで
+ その景色はガラリと変わる。C には無論クラスなどという概念はない、故に、AOPの必要性
+ もない。AOP はOOP の継承構造を邪魔せず、共通の処理を派生クラスでキレイに実現するもの
+ だと認識している。（GoF を利用すれば、解決できることもあろう、が根本的にAOPとOOPは
+ その目的、実装が異なると解釈している。）
+ 懐かしいなJava Aspect ：）
+ Java Aspect これはいつ頃のものだ？C/C++が基盤であれば、その時の技術の上で成立して
+ いるはずだよね。それともこれは、Java オリジナルなのか？　後で調べてみるかな。
+ 忘れてなかったらね。
+ 
+ 
+【マクロ】
+ #define疑似命令による置き換えで式などを簡単に表現すること。
+ マクロでは、使用している場所のプログラムそれ自体が置き換わり、
+ 呼び出しなどの作業が必要ないため、若干高速になります。
+ 
+ しかし、マクロを使う場所すべてが置き換わるので、あまり巨大なマクロを作ると、
+ その為にプログラムのサイズが極端に大きくなることもあります。
+ 
+ その為、一般的には、マクロは、決まり切った数式などに利用されます。
+ 
+ 残念、単にマクロであってたのか orz
+ 
+ 
+ 副作用の恐怖 
+ #define疑似命令によるマクロは手軽で便利なのですが、
+ 使い方を間違えると思わぬ現象に遭遇することがあります。
+ たとえば、前回の台形の面積を求めるプログラムに置いて、
+ なんらかの事情で、高さを常に+3しなければならない場合を考えてみます。
+ 次のプログラムは、そのように変更してみた例です。
+ （おっとこれは、写経必須ですね。）
+
+ 
 */
 #include "stdio.h"
 
 // tax_consumption 消費税、Google翻訳丸コピ
 #define TAX_CONSUMPTION 0.10
 #define AUTHOR "AlienM14xR2 Jack"
+#define PRINT_OUTER_HEAVEN printf("OUTER_HEAVEN is %d\n", OUTER_HEAVEN);
+// これなら引数も渡せるのか。
+#define PRINT_D(X) printf("X is %d\n", X)
+// 台形の面積を求めるマクロ。
+#define GET_TRAPEZOID_AREA(A, B, H) (A + B) * H / 2
+
+//
+// グローバル
+//
+int static OUTER_HEAVEN = 100;
 
 // あっいいかも：）gedit
 // 忘れてたこと、勘違いしていたこととして、C 言語には関数のオーバーロードはないぞ。
@@ -135,10 +208,12 @@ int compute_sell(const int price, int* selling) {
 }
 
 int main(void) {
+    OUTER_HEAVEN -= 1;
     println("START マクロ ===============");
     debug_d("FD3Sは、",7);
     debug_f("πは、",3.14159);
     debug_s("Je pense, donc je suis", "我思う、故に我在り");
+    PRINT_OUTER_HEAVEN;
     if(1) {
         int ms09 = 9;
         int* rx78 = &ms09;
@@ -146,6 +221,7 @@ int main(void) {
         debug_s("おれを踏み台に！？","うあぁぁっ（ア");
         debug_ptr_pd("そこだ（キラッ", rx78);
         // うん、オレのなかでポインタとはアムロ・レイそのものだと：）        
+        --OUTER_HEAVEN;
     }
     if(1) {
         int sell = -1;
@@ -154,7 +230,88 @@ int main(void) {
         debug_d("(*selling) is ",*selling);
         debug_d("sell is ",sell);
         debug_s("Code by ", AUTHOR);
+        --OUTER_HEAVEN;
     }
+    if(1) {
+        PRINT_OUTER_HEAVEN;
+        PRINT_D(369);
+        int ans = GET_TRAPEZOID_AREA(6,9,6);
+        debug_d("ans（台形の面積だぜ） is ",ans);
+        double ansd = GET_TRAPEZOID_AREA(6.0,9.0,3.0);
+        debug_f("ansd（台形の面積だぜ） is ",ansd);
+        // 見事だね：）
+        // C++ generic lambda と auto を思い出した。
+    }
+    // マクロの副作用の恐怖。
+    if(1) {
+        int h = 3;
+        int ans = GET_TRAPEZOID_AREA(6,9,h+3);        
+        debug_d("ans（台形の面積だぜ） is ",ans);
+        // この様に、置き換えで予期しない計算結果になることを
+        // マクロの副作用と呼びます。
+        // これを解決する方法は2つあります。1つは、呼び出し時にかっこ
+        // をつけることです。
+        ans = GET_TRAPEZOID_AREA(6,9,(h+3));
+        debug_d("ans（台形の面積だぜ） is ",ans);
+        // うん、同じだ。
+        
+        // もう1つの方法は、マクロの方にかっこをつけておく方法です。
+        // #define GET_TRAPEZOID_AREA(A, B, H) (((A) + (B)) * (H) / 2)
+        // あぁ急に見づらくなったな。
+        
+        // しかし、気をつけて使用するのは面倒ですし、うっかり忘れてしまうかも
+        // しれません。その為、マクロはあまり多用しない方が良いとされています。
+        // #define疑似命令は定数の宣言にのみ使用して、数式などの計算にはできる限り
+        // 関数を使用する方が良いでしょう。
+
+    }   
     println("=============== マクロ END");
 	return 0;
 }
+
+/**
+オリンピックの問題はもう飽きたのだ。
+
+int olympic(int year);
+
+enum {
+    OLYMIPC_NON,
+    OLYMIPC_SUMMER,
+    OLYMIPC_WINTER,
+};
+
+int main(void)
+{
+    int year, hold;
+
+    scanf("%d", &year);
+    hold = olympic(year);
+
+    switch (hold) {
+    case OLYMIPC_NON:
+        printf("開かれない\n");
+        break;
+    case OLYMIPC_SUMMER:
+        printf("夏季五輪\n");
+        break;
+    case OLYMIPC_WINTER:
+        printf("冬季五輪\n");
+        break;
+    };
+
+    return 0;
+}
+
+int olympic(int year)
+{
+    if (year % 2 == 0) {
+        if (year % 4 == 0) {
+            return OLYMIPC_SUMMER;
+        } else {
+            return OLYMIPC_WINTER;
+        }
+    } else {
+        return OLYMIPC_NON;
+    }
+}
+*/
