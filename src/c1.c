@@ -145,11 +145,14 @@ void death(void) {
 }
 // int new これが、デフォルトの New。
 int* new_int(void);
-// int new 値を代入、初期化を可能にしたもの。
+// int new 値を代入、初期化を可能にしたもの。（宣言だけ、定義はまだないよ。）
 int* new_int_val(const int);
 
 // これは、理想とは違うんだけどね、ひとまず、確認です。
 int* mock_new_int(void);
+
+// これも、理想とは違うけど、初期化を可能にしたもの。
+int* mock_new_int_val(const int);
 
 int main(void) {
     println("START c1 ===============");
@@ -227,7 +230,7 @@ int main(void) {
         printf("heap_i address is \t%p\n",heap_i);
         // これを見ると new_int 関数内のローカル変数とその戻り値で初期化された、heap_i のアドレスは同じ。
         // new_int 関数内で動的取得されたメモリをこのアドレスで追跡できるのでは。
-        // プロブラム上で必要なHeap はこれらの外で管理する。単純にはブロックスコープ。
+        // プロブラム上で必要なHeap はこれらの外で管理する。単純なのはブロックスコープ。
         // Step by Step で進めるよ。
         free(heap_i);
     }
@@ -243,6 +246,23 @@ int main(void) {
             *heap_i = 333;
             debug_ptr_d("heap_i\t",heap_i);
             debug_ptr_d("int_array_[0]",&int_array_[0]);
+            debug_d("int_array_index is ",int_array_index_);
+            // 限界 ... INT_HEAP_SIZE までデータを作ってみようか
+            debug_d("INT_HEAP_SIZE is ",INT_HEAP_SIZE);
+            int* heap_j[100];
+            for(int j=0; j < INT_HEAP_SIZE ;j++) {
+                heap_j[j] = mock_new_int_val(j);
+                if( heap_j[j] != NULL ) {
+                    debug_d("int_array_index is ",int_array_index_);
+                    debug_ptr_d("heap_j\t",heap_j[j]);
+                    // コンソールに出力される値は value = 98 までのはず。
+                    // Yes、ただしいよね。既に１個は使ってるからね。
+                    // 結果ポインタ配列で確保できたものは 99個 で 100個 ではない。 
+                } else {
+                    printf("heap_j[%d] is %p\n",j, heap_j[j]);
+                    // C 言語、MOTHERだったのね。%p で (nil) 出力してたの：）
+                }
+            }
             println("===== ブロックスコープ 2 END");
         }
         death();
@@ -262,6 +282,16 @@ int* mock_new_int(void) {
         // ここで  realloc すればメモリの動的再取得ができるが。
         // この管理方法は素人目に見ても、スレッドセーフではなさそうだよね。
         // 無論今はそこまで、考慮はしないが。
+        return NULL;
+    }
+}
+
+int* mock_new_int_val(const int num) {
+    int* heap = mock_new_int();
+    if( heap != NULL ) {
+        *heap = num;
+        return heap;
+    } else {
         return NULL;
     }
 }
