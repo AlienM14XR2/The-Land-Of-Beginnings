@@ -73,7 +73,6 @@ int main(void) {
            - Open Close
            - fputc fgetc
            1文字ファイルへ書き込み、そして1文字ファイルから読み込む。
-           
         */
         println("---------------------------- 2");
         FILE* fp = NULL;
@@ -152,6 +151,7 @@ int main(void) {
         fp = fopen("sample-2023-04-20-v4.bin","rb");
         if(fp != NULL) {
             unsigned char data[16] = {0};
+            printf("sizeof(data)/sizeof(data[0]) is %ld\n",sizeof(data)/sizeof(data[0]));
             fread(data,sizeof(unsigned char),sizeof(data)/sizeof(data[0]),fp);
             for(int i=0 ; i < sizeof(data)/sizeof(data[0]) ;i++) {
                 printf("0x%02x\t",data[i]);
@@ -160,9 +160,41 @@ int main(void) {
             fclose(fp);
         }
     }
+    if(5) {
+        /**
+                          構造体を用いた、バイナリファイルの読み書き。
+            - sample-2023-04-27-v5.bin (wb/rb)
+            - typedef struct {...} S_STATUS
+            - open close
+            - fwrite fread
+        */
+        println("---------------------------- 5");
+        typedef struct {
+            char          name[16];     // 名前
+            unsigned long hp;           // HP
+            unsigned long mp;           // MP
+            unsigned char level;        // レベル
+            unsigned char strength;     // 強さ
+            unsigned char speed;        // 素早さ
+            unsigned char wisdom;       // 賢さ
+            unsigned long experience;   // 経験値
+        } S_STATUS;
+        FILE* fp = NULL;
+        if(5.1) {
+            println("write save data ... ");
+            S_STATUS characters[] = {
+                {"Brave",  180, 50,  1, 22, 16, 15, 0},
+                {"Knight", 150,  0,  1, 25, 18,  6, 0},
+                {"Wizard", 90, 120,  1, 13, 10, 22, 0},
+            };
+            fp = fopen("sample-2023-04-27-v5.bin","wb");
+            if(fp != NULL) {
+                fwrite(characters,sizeof(S_STATUS),sizeof(characters)/sizeof(characters[0]),fp);
+                fclose(fp);
+                println(" ... end");
+            }
+        }
+    }
     printf("=============== Standard Library I/O END\n");
     return 0;
 }
-
-
-
