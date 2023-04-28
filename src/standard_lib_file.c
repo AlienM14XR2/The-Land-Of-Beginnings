@@ -193,6 +193,19 @@ int main(void) {
                 fclose(fp);
                 println(" ... end");
             }
+            fp = NULL;
+        }
+        if(5.2) {
+            println("read save data ... ");
+            S_STATUS characters[3] = {0};
+            fp = fopen("sample-2023-04-27-v5.bin","rb");
+            if( fp != NULL ) {
+                fread(characters,sizeof(S_STATUS),sizeof(characters)/sizeof(characters[0]),fp);
+                for(int i=0; i < sizeof(characters)/sizeof(characters[0]) ;i++) {
+                    printf("%s, HP:%ld, MP:%ld, Level:%d, Strength:%d, Speed:%d, Wisdom:%d, Exp:%ld\n",characters[i].name, characters[i].hp, characters[i].mp, characters[i].level, characters[i].strength, characters[i].speed, characters[i].wisdom, characters[i].experience);
+                }
+                fclose(fp);
+            }
         }
     }
     printf("=============== Standard Library I/O END\n");
