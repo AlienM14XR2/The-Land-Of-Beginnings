@@ -24,9 +24,11 @@ void ptr_str_debug(const char* message, char* debug) {
 }
 
 int handler(char*);
-int cmd_exit(void);
+int cmd_exit(char*);
+int cmd_create(char*);
 int upper_str(const char*, char*);
 int init_cmd(char*);
+int init_io(char*,char*);
 int monitoring() {
     char cmd[256]={'\0'};
     char cmd_upper[256]={'\0'};
@@ -35,13 +37,11 @@ int monitoring() {
     while(1) {
         upper_str(cmd,cmd_upper);
 //        ptr_str_debug("cmd_upper is",cmd_upper);
+        // handler には必ず、Upper された文字列を実引数にすること。
         if( handler(cmd_upper) == 1 ) {   // 1 が返却された時はループを抜ける。
             break;
         }
-        printf("ORx2> ");    
-        init_cmd(cmd);
-        init_cmd(cmd_upper);
-        scanf("%s", cmd);
+        init_io(cmd,cmd_upper);
     }
     return 0;
 }
@@ -58,18 +58,32 @@ int upper_str(const char* in, char* out) {
     }
     return 0;
 }
+int init_io(char* cmd,char* cmd_upper) {
+    printf("ORx2> ");    
+    init_cmd(cmd);
+    init_cmd(cmd_upper);
+    scanf("%s", cmd);
+    return 0;
+}
 int handler(char* cmd) {
-    if(strcmp("EXIT",cmd) == 0) {
-        cmd_exit();
+    if(cmd_exit(cmd) == 1) {
         return 1;
-    } else if(strcmp("CREATE",cmd) == 0) {  // ここからはTrim して半角スペースの除去が必要かもしれない。
-        
-        println("It's create.");
+    }
+    cmd_create(cmd);
+    return 0;
+}
+int cmd_exit(char* cmd) {
+    if(strcmp("EXIT",cmd) == 0) {
+        println("Bye :)");
+        return 1;
     }
     return 0;
 }
-int cmd_exit(void) {
-    println("bye.");
+int cmd_create(char* cmd) {
+    // ここからはTrim して半角スペースの除去が必要かもしれない。
+    if(strcmp("CREATE",cmd) == 0) {
+        println("It's create.");
+    }
     return 0;
 }
 
@@ -87,9 +101,11 @@ int main(void) {
         ptr_lf_debug("pp is ",pp);
         ptr_str_debug("str is ",str);
     }
-    // CLI の無限ループ
-    monitoring();
-    // Command によりループを脱出できる
+    if(9) {
+        // CLI の無限ループ
+        monitoring();
+        // Command によりループを脱出できる
+    }
     println("=============== Command Line Interface END");
     return 0;
 }
