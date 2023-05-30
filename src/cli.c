@@ -7,6 +7,7 @@
 */
 #include "stdio.h"
 #include "stdlib.h"
+#include "string.h"
 
 void println(const char* message){
     printf("%s\n",message);
@@ -21,11 +22,26 @@ void ptr_str_debug(const char* message, char* debug) {
     printf("%s\tvalue=%s\taddr=%p\n",message,debug,debug);
 }
 
+int handler(char*);
 int monitoring() {
     char cmd[256]={'\0'};
     printf("ORx2> ");    
     scanf("%s", cmd);
-    ptr_str_debug("cmd is ",cmd);
+    while(1) {
+        if( handler(cmd) == 1 ) {
+            break;
+        }
+        printf("ORx2> ");    
+        cmd[0]='\0';
+        scanf("%s", cmd);
+    }
+    return 0;
+}
+int handler(char* cmd) {
+    if(strcmp("exit",cmd) == 0) {
+        return 1;
+    }
+    return 0;
 }
 int cmd_exit() {
     return 0;
