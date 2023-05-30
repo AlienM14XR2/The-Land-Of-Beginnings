@@ -8,6 +8,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
+#include "ctype.h"
 
 void println(const char* message){
     printf("%s\n",message);
@@ -23,31 +24,54 @@ void ptr_str_debug(const char* message, char* debug) {
 }
 
 int handler(char*);
+int cmd_exit(void);
+int upper_str(const char*, char*);
+int init_cmd(char*);
 int monitoring() {
     char cmd[256]={'\0'};
+    char cmd_upper[256]={'\0'};
     printf("ORx2> ");    
     scanf("%s", cmd);
     while(1) {
-        if( handler(cmd) == 1 ) {
+        upper_str(cmd,cmd_upper);
+//        ptr_str_debug("cmd_upper is",cmd_upper);
+        if( handler(cmd_upper) == 1 ) {   // 1 が返却された時はループを抜ける。
             break;
         }
         printf("ORx2> ");    
-        cmd[0]='\0';
+        init_cmd(cmd);
+        init_cmd(cmd_upper);
         scanf("%s", cmd);
     }
     return 0;
 }
-int handler(char* cmd) {
-    if(strcmp("exit",cmd) == 0) {
-        return 1;
+int init_cmd(char* cmd) {
+    for(int i = 0; i < sizeof(cmd)/sizeof(cmd[0]); i++) {
+        cmd[i] = '\0';
+    }
+}
+int upper_str(const char* in, char* out) {
+    int i = 0;
+    while(in[i] != '\0') {
+        out[i] = toupper(in[i]);
+        i++;
     }
     return 0;
 }
-int cmd_exit() {
+int handler(char* cmd) {
+    if(strcmp("EXIT",cmd) == 0) {
+        cmd_exit();
+        return 1;
+    } else if(strcmp("CREATE",cmd) == 0) {  // ここからはTrim して半角スペースの除去が必要かもしれない。
+        
+        println("It's create.");
+    }
     return 0;
 }
-
-
+int cmd_exit(void) {
+    println("bye.");
+    return 0;
+}
 
 int main(void) {
     println("START Command Line Interface ===============");
