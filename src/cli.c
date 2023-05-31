@@ -10,7 +10,7 @@
     　便利だと思ったのはMySQL に存在（PostgreSQL にもある）する、上下、↑、↓による、記憶
     　された、コマンドの表示だ。
     
-    
+    @Author Jack    
 */
 #include "stdio.h"
 #include "stdlib.h"
@@ -100,6 +100,19 @@ int cmd_create(char* cmd) {
     }
     return 0;
 }
+/**
+    is End of Command.
+        入力されたコマンドの終端を検知する。
+    0 is no hit.
+    1 is hit.
+*/
+int is_eoc(const char* c) {
+    if(*c == ';' || *c == '\0') {
+        return 1;
+    }
+    return 0;
+}
+
 //
 // ここからテスト用関数です。
 //
@@ -115,7 +128,7 @@ int test_split_string() {
     for(int i = 0;;i++) {
         if(cmd_upper[i] == ' ') {
             count++;
-        } else if(cmd_upper[i] == ';' || cmd_upper[i] == '\0' ) {
+        } else if(is_eoc(&cmd_upper[i])) {
             break;
         }
     }
