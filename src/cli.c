@@ -4,6 +4,9 @@
     
          参考にするのは、MySQL, PostGreSQL の表現とする。
     　基本は、コマンドになる、コマンド、イコール、関数であろう。
+    　
+    　もし、CREATE DATABASE に相当するものが、これで必要な場合は、それは、アプリの初期値の
+    　設定だと思う、無論、今今の話ではない。
 */
 #include "stdio.h"
 #include "stdlib.h"
@@ -86,7 +89,13 @@ int cmd_create(char* cmd) {
     }
     return 0;
 }
-
+//
+// ここからテスト用関数です。
+//
+int test_split_string() {
+    println("--------------------------------------- test_split_string");
+    return 0;
+}
 int main(void) {
     println("START Command Line Interface ===============");
     if(1) {     // デバッグ、動作確認。
@@ -101,7 +110,12 @@ int main(void) {
         ptr_lf_debug("pp is ",pp);
         ptr_str_debug("str is ",str);
     }
-    if(9) {
+    if(2) {     // 細々とした作り込みが必要な場合のテスト、動確のために用意した。
+        // 文字列のスプリット、これが非常によかった、考え方のね。
+        // https://qiita.com/IKEH/items/5f8a3047cfeee5c74574
+        test_split_string();
+    }
+    if(0) {
         // CLI の無限ループ
         monitoring();
         // Command によりループを脱出できる
