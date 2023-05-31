@@ -1,17 +1,28 @@
 /**
     CLI (Command Line Interface) 
     C 標準入出力、主に出力にフォーカスして、学習を進める。
-    
-         参考にするのは、MySQL, PostGreSQL の表現とする。
+    　参考にするのは、MySQL, PostGreSQL の表現とする。
     　基本は、コマンドになる、コマンド、イコール、関数であろう。
-    　
+    
     　もし、CREATE DATABASE に相当するものが、これで必要な場合は、それは、アプリの初期値の
     　設定だと思う、無論、今今の話ではない。
+    
+    　便利だと思ったのはMySQL に存在（PostgreSQL にもある）する、上下、↑、↓による、記憶
+    　された、コマンドの表示だ。
+    
+    
 */
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 #include "ctype.h"
+
+#define CMD_SIZE 1024
+#define CMD_SPLIT_SIZE 32
+
+typedef struct {
+    char data[CMD_SPLIT_SIZE];
+} FILE_DATA; 
 
 void println(const char* message){
     printf("%s\n",message);
@@ -33,8 +44,8 @@ int upper_str(const char*, char*);
 int init_cmd(char*);
 int init_io(char*,char*);
 int monitoring() {
-    char cmd[256]={'\0'};
-    char cmd_upper[256]={'\0'};
+    char cmd[CMD_SIZE]={'\0'};
+    char cmd_upper[CMD_SIZE]={'\0'};
     printf("ORx2> ");    
     scanf("%s", cmd);
     while(1) {
@@ -94,6 +105,24 @@ int cmd_create(char* cmd) {
 //
 int test_split_string() {
     println("--------------------------------------- test_split_string");
+    // 区切り文字（Delimiter ）は決める必要がある。
+    // ひと固まりの文字列がある。
+    // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
+    // 分割されたものは、各々配列に入れ直す。
+    println("INSERT () = ();");
+    char cmd_upper[256] = {"INSERT () = ();"};
+    int count = 1;
+    for(int i = 0;;i++) {
+        if(cmd_upper[i] == ' ') {
+            count++;
+        } else if(cmd_upper[i] == ';' || cmd_upper[i] == '\0' ) {
+            break;
+        }
+    }
+    ptr_d_debug("count is ",&count);
+    FILE_DATA fdata[count];
+    // もう一度ループ解析して、今度は、動的に確保したFILE_DATA に分割したコマンドを代入していく。
+    
     return 0;
 }
 int main(void) {
