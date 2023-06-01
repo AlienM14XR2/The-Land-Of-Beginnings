@@ -21,7 +21,7 @@
 #define CMD_SPLIT_SIZE 32   // strncpy 結局分割されたコマンドが、このサイズを超えたら、問題がある、Null 文字'\0' が自動挿入されない、だから大きめに設定することを進める、また、サイズ計算を行い、超える場合はしっかりとエラーハンドリングする必要がある。
 
 typedef struct {
-    char data[CMD_SPLIT_SIZE];
+    char data[CMD_SPLIT_SIZE+1];
 } FILE_DATA; 
 
 void println(const char* message){
@@ -133,26 +133,40 @@ int test_split_string() {
         }
     }
     ptr_d_debug("count is ",&count);
-    FILE_DATA fdata[count];
     // もう一度ループ解析して、今度は、動的に確保したFILE_DATA に分割したコマンドを代入していく。
     // まずは、分割文字列の取得、表示確認から。
+    FILE_DATA fdata[count];
     char tmp[CMD_SPLIT_SIZE] ={'\0'};
     int j = 0;
+    int k = 0;
     for(int i = 0;;i++) {
-        if(cmd_upper[i] != ' ') {
+        if(cmd_upper[i] != ' ' && cmd_upper[i] != ';' ) {
             tmp[j] = cmd_upper[i];
             j++;     
         } else {
-            // tmp に関するデータのリセット
+            // 最後にNull 文字を追加しておく
+            tmp[j] = '\0';
+            // デバッグ、ここで少し、tmp のサイズが気になった：）
             ptr_str_debug("tmp is ",tmp);
+            int len = strlen(tmp);
+            ptr_d_debug("len is ",&len);
+            // fdata[k].data の初期化が必要かな：）
+            init_cmd(fdata[k].data);
+            strncpy(fdata[k].data,tmp,len);
+            k++;
+            // tmp に関するデータのリセット
             j = 0;
-            init_cmd(tmp);   
+            init_cmd(tmp);
+            
         }
         if(is_eoc(&cmd_upper[i])) {
-            ptr_str_debug("tmp is ",tmp);
             break;
         }
-    }    
+    }
+    // デバッグ最終確認
+    for(int i = 0;i < count; i++) {
+        ptr_str_debug("data is ",fdata[i].data);
+    }
     return 0;
 }
 int main(void) {
