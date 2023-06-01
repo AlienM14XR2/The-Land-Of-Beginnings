@@ -18,7 +18,7 @@
 #include "ctype.h"
 
 #define CMD_SIZE 1024
-#define CMD_SPLIT_SIZE 32
+#define CMD_SPLIT_SIZE 32   // strncpy 結局分割されたコマンドが、このサイズを超えたら、問題がある、Null 文字'\0' が自動挿入されない、だから大きめに設定することを進める、また、サイズ計算を行い、超える場合はしっかりとエラーハンドリングする必要がある。
 
 typedef struct {
     char data[CMD_SPLIT_SIZE];
@@ -135,7 +135,24 @@ int test_split_string() {
     ptr_d_debug("count is ",&count);
     FILE_DATA fdata[count];
     // もう一度ループ解析して、今度は、動的に確保したFILE_DATA に分割したコマンドを代入していく。
-    
+    // まずは、分割文字列の取得、表示確認から。
+    char tmp[CMD_SPLIT_SIZE] ={'\0'};
+    int j = 0;
+    for(int i = 0;;i++) {
+        if(cmd_upper[i] != ' ') {
+            tmp[j] = cmd_upper[i];
+            j++;     
+        } else {
+            // tmp に関するデータのリセット
+            ptr_str_debug("tmp is ",tmp);
+            j = 0;
+            init_cmd(tmp);   
+        }
+        if(is_eoc(&cmd_upper[i])) {
+            ptr_str_debug("tmp is ",tmp);
+            break;
+        }
+    }    
     return 0;
 }
 int main(void) {
