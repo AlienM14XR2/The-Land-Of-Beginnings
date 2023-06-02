@@ -43,6 +43,7 @@ int cmd_create(char*);
 int upper_str(const char*, char*);
 int init_cmd(char*);
 int init_io(char*,char*);
+
 int monitoring() {
     char cmd[CMD_SIZE]={'\0'};
     char cmd_upper[CMD_SIZE]={'\0'};
@@ -122,6 +123,7 @@ int test_split_string() {
     // ひと固まりの文字列がある。
     // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
     // 分割されたものは、各々配列に入れ直す。
+    // --- A ここから ---
     println("INSERT () = ();");
     char cmd_upper[256] = {"INSERT () = ();"};
     int count = 1;
@@ -136,6 +138,9 @@ int test_split_string() {
     // もう一度ループ解析して、今度は、動的に確保したFILE_DATA に分割したコマンドを代入していく。
     // まずは、分割文字列の取得、表示確認から。
     FILE_DATA fdata[count];
+    // --- A ここまで ---
+    
+    // --- B ここから ---
     char tmp[CMD_SPLIT_SIZE] ={'\0'};
     int j = 0;
     int k = 0;
@@ -163,6 +168,7 @@ int test_split_string() {
             break;
         }
     }
+    // --- B ここまで ---
     // デバッグ最終確認
     for(int i = 0;i < count; i++) {
         ptr_str_debug("data is ",fdata[i].data);
