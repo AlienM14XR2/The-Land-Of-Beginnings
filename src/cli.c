@@ -133,28 +133,7 @@ int cmd_analyze(const char* cmd_upper, int* count) {
     }
     return 0;
 }
-//
-// ここからテスト用関数です。
-//
-int test_split_string() {
-    println("--------------------------------------- test_split_string");
-    // 区切り文字（Delimiter ）は決める必要がある。
-    // ひと固まりの文字列がある。
-    // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
-    // 分割されたものは、各々配列に入れ直す。
-    // --- A ここから --- コマンド解析
-    println("e.g. INSERT () = ();");
-    char cmd_upper[256] = {"INSERT () = ();"};
-    int count = 0;
-    int* pcnt = &count;
-    cmd_analyze(cmd_upper, pcnt);
-    ptr_d_debug("count is ", &count);
-    FILE_DATA fdata[count];
-    // --- A ここまで --- コマンド解析
-    
-    // --- B ここから --- コマンド分割
-    // もう一度ループ解析して、今度は、動的に確保したFILE_DATA に分割したコマンドを代入していく。
-    // まずは、分割文字列の取得、表示確認から。
+int cmd_segment(const char* cmd_upper, FILE_DATA* fdata) {
     char tmp[CMD_SPLIT_SIZE] ={'\0'};
     int j = 0;
     int k = 0;
@@ -182,6 +161,31 @@ int test_split_string() {
             break;
         }
     }
+    return 0;
+}
+//
+// ここからテスト用関数です。
+//
+int test_split_string() {
+    println("--------------------------------------- test_split_string");
+    // 区切り文字（Delimiter ）は決める必要がある。
+    // ひと固まりの文字列がある。
+    // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
+    // 分割されたものは、各々配列に入れ直す。
+    // --- A ここから --- コマンド解析
+    println("e.g. INSERT () = ();");
+    char cmd_upper[256] = {"INSERT () = ();"};
+    int count = 0;
+    int* pcnt = &count;
+    cmd_analyze(cmd_upper, pcnt);
+    ptr_d_debug("count is ", &count);
+    FILE_DATA fdata[count];
+    // --- A ここまで --- コマンド解析
+    
+    // --- B ここから --- コマンド分割
+    // もう一度ループ解析して、今度は、動的に確保したFILE_DATA に分割したコマンドを代入していく。
+    // まずは、分割文字列の取得、表示確認から。
+    cmd_segment(cmd_upper, fdata);
     // --- B ここまで --- コマンド分割
     // デバッグ最終確認
     for(int i = 0;i < count; i++) {
