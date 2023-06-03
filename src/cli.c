@@ -114,6 +114,25 @@ int is_eoc(const char* c) {
     return 0;
 }
 
+/**
+    コマンドの解析
+    入力されたコマンドを半角スペースで解析する。
+    いつくに分割すべきなのかを予め計算する。
+    関数は、基本戻り値はその処理の成功、失敗に用いる。
+    よって、引数（ポインタ）で解析結果は返却する。
+*/
+int cmd_analyze(const char* cmd_upper, int* count) {
+    // count の初期化 1 おそらくここは、cmd_upper の有無によりValidation が必要。
+    *count = 1;
+    for(int i = 0;;i++) {
+        if(cmd_upper[i] == ' ') {
+            (*count)+=1;
+        } else if(is_eoc(&cmd_upper[i])) {
+            break;
+        }
+    }
+    return 0;
+}
 //
 // ここからテスト用関数です。
 //
@@ -123,24 +142,19 @@ int test_split_string() {
     // ひと固まりの文字列がある。
     // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
     // 分割されたものは、各々配列に入れ直す。
-    // --- A ここから ---
-    println("INSERT () = ();");
+    // --- A ここから --- コマンド解析
+    println("e.g. INSERT () = ();");
     char cmd_upper[256] = {"INSERT () = ();"};
-    int count = 1;
-    for(int i = 0;;i++) {
-        if(cmd_upper[i] == ' ') {
-            count++;
-        } else if(is_eoc(&cmd_upper[i])) {
-            break;
-        }
-    }
-    ptr_d_debug("count is ",&count);
+    int count = 0;
+    int* pcnt = &count;
+    cmd_analyze(cmd_upper, pcnt);
+    ptr_d_debug("count is ", &count);
+    FILE_DATA fdata[count];
+    // --- A ここまで --- コマンド解析
+    
+    // --- B ここから --- コマンド分割
     // もう一度ループ解析して、今度は、動的に確保したFILE_DATA に分割したコマンドを代入していく。
     // まずは、分割文字列の取得、表示確認から。
-    FILE_DATA fdata[count];
-    // --- A ここまで ---
-    
-    // --- B ここから ---
     char tmp[CMD_SPLIT_SIZE] ={'\0'};
     int j = 0;
     int k = 0;
@@ -168,7 +182,7 @@ int test_split_string() {
             break;
         }
     }
-    // --- B ここまで ---
+    // --- B ここまで --- コマンド分割
     // デバッグ最終確認
     for(int i = 0;i < count; i++) {
         ptr_str_debug("data is ",fdata[i].data);
