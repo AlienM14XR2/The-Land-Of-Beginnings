@@ -22,7 +22,7 @@
 
 typedef struct {
     char data[CMD_SPLIT_SIZE+1];
-} FILE_DATA; 
+} CMD_DATA; 
 
 void println(const char* message){
     printf("%s\n",message);
@@ -133,7 +133,7 @@ int cmd_analyze(const char* cmd_upper, int* count) {
     }
     return 0;
 }
-int cmd_segment(const char* cmd_upper, FILE_DATA* fdata) {
+int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
     char tmp[CMD_SPLIT_SIZE] ={'\0'};
     int j = 0;
     int k = 0;
@@ -179,11 +179,11 @@ int test_split_string() {
     int* pcnt = &count;
     cmd_analyze(cmd_upper, pcnt);
     ptr_d_debug("count is ", &count);
-    FILE_DATA fdata[count];
+    CMD_DATA fdata[count];
     // --- A ここまで --- コマンド解析
     
     // --- B ここから --- コマンド分割
-    // もう一度ループ解析して、今度は、動的に確保したFILE_DATA に分割したコマンドを代入していく。
+    // もう一度ループ解析して、今度は、動的に確保したCMD_DATA に分割したコマンドを代入していく。
     // まずは、分割文字列の取得、表示確認から。
     cmd_segment(cmd_upper, fdata);
     // --- B ここまで --- コマンド分割
