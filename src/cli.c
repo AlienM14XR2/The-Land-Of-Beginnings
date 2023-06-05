@@ -21,7 +21,8 @@
 #define CMD_SPLIT_SIZE 32   // strncpy 結局分割されたコマンドが、このサイズを超えたら、問題がある、Null 文字'\0' が自動挿入されない、だから大きめに設定することを進める、また、サイズ計算を行い、超える場合はしっかりとエラーハンドリングする必要がある。
 
 typedef struct {
-    char data[CMD_SPLIT_SIZE+1];
+    int no;
+    char data[CMD_SPLIT_SIZE];
 } CMD_DATA; 
 
 void println(const char* message){
@@ -133,6 +134,14 @@ int cmd_analyze(const char* cmd_upper, int* count) {
     }
     return 0;
 }
+int cmd_cpy(char* dest, const char* src, const int len) {
+    int i = 0;
+    for(;i < len; i++) {
+        dest[i] = src[i];
+    }
+    dest[i] = '\0';
+    return 0;
+}
 int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
     char tmp[CMD_SPLIT_SIZE] ={'\0'};
     int j = 0;
@@ -147,20 +156,28 @@ int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
             // デバッグ、ここで少し、tmp のサイズが気になった：）
             ptr_str_debug("tmp is ",tmp);
             int len = strlen(tmp);
-            ptr_d_debug("len is ",&len);
-            // fdata[k].data の初期化が必要かな：）
+            ptr_d_debug("\tlen is ",&len);
+            // fdata[k].data の初期化が必要かな：）            
             init_cmd(fdata[k].data);
-            strncpy(fdata[k].data,tmp,len);
+            fdata[k].no = k;
+            // これ、ゴミが混入するから止めた：）
+//            strncpy(fdata[k].data,tmp,len);
+            cmd_cpy(fdata[k].data,tmp,len);            
             k++;
             // tmp に関するデータのリセット
             j = 0;
-            init_cmd(tmp);
-            
+            init_cmd(tmp);            
         }
         if(is_eoc(&cmd_upper[i])) {
             break;
         }
     }
+    return 0;
+}
+int cmd_segment_array(const char* cmd_upper, char* multi[]) {
+//    for(int i = 0;i < sizeof(multi)/sizeof(multi[0]);i++) {
+//        printf("i = %d\n",i);
+//    }
     return 0;
 }
 //
@@ -173,14 +190,23 @@ int test_split_string() {
     // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
     // 分割されたものは、各々配列に入れ直す。
     // --- A ここから --- コマンド解析
-    println("e.g. INSERT () = ();");
-    char cmd_upper[256] = {"INSERT () = ();"};
+    println("e.g. INSERT INTO FILE_NAME(COLUMN_NAME_1, COLUMN_NAME_2) VALUES (VALUE_1, VALUE_2);");
+    char cmd_upper[CMD_SIZE] = {"INSERT INTO FILE_NAME(COLUMN_NAME_1, COLUMN_NAME_2) VALUES (VALUE_1, VALUE_2);"};
     int count = 0;
     int* pcnt = &count;
     cmd_analyze(cmd_upper, pcnt);
     ptr_d_debug("count is ", &count);
     CMD_DATA fdata[count];
     // --- A ここまで --- コマンド解析
+    
+    // 二次元配列を試してみる。
+//    char cmd_data[count][CMD_SPLIT_SIZE];
+//    for(int i = 0;i < count; i++) {
+//        init_cmd(cmd_data[i]);
+//    }
+//    char* pdata = &cmd_data[0];
+//    char** ppdata = &pdata;
+//    cmd_segment_array(cmd_upper, ppdata);
     
     // --- B ここから --- コマンド分割
     // もう一度ループ解析して、今度は、動的に確保したCMD_DATA に分割したコマンドを代入していく。
@@ -189,7 +215,8 @@ int test_split_string() {
     // --- B ここまで --- コマンド分割
     // デバッグ最終確認
     for(int i = 0;i < count; i++) {
-        ptr_str_debug("data is ",fdata[i].data);
+//        ptr_str_debug("data is ",fdata[i].data);
+        printf("no is %d\tdata is %s\n",fdata[i].no,fdata[i].data);
     }
     return 0;
 }
