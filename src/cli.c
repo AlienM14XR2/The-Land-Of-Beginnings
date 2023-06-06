@@ -157,13 +157,11 @@ int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
             ptr_str_debug("tmp is ",tmp);
             int len = strlen(tmp);
             ptr_d_debug("\tlen is ",&len);
-            // fdata[k].data の初期化が必要かな：）            
-            init_cmd(fdata[k].data);
-            fdata[k].no = k;
-            // これ、ゴミが混入するから止めた：）
-//            strncpy(fdata[k].data,tmp,len);
-            cmd_cpy(fdata[k].data,tmp,len);            
-            k++;
+            if(len > 0) {
+                fdata[k].no = k;
+                cmd_cpy(fdata[k].data,tmp,len);            
+                k++;
+            }
             // tmp に関するデータのリセット
             j = 0;
             init_cmd(tmp);            
@@ -174,12 +172,7 @@ int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
     }
     return 0;
 }
-int cmd_segment_array(const char* cmd_upper, char* multi[]) {
-//    for(int i = 0;i < sizeof(multi)/sizeof(multi[0]);i++) {
-//        printf("i = %d\n",i);
-//    }
-    return 0;
-}
+
 //
 // ここからテスト用関数です。
 //
@@ -190,13 +183,18 @@ int test_split_string() {
     // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
     // 分割されたものは、各々配列に入れ直す。
     // --- A ここから --- コマンド解析
-    println("e.g. INSERT INTO FILE_NAME(COLUMN_NAME_1, COLUMN_NAME_2) VALUES (VALUE_1, VALUE_2);");
-    char cmd_upper[CMD_SIZE] = {"INSERT INTO FILE_NAME(COLUMN_NAME_1, COLUMN_NAME_2) VALUES (VALUE_1, VALUE_2);"};
+    println("e.g. INSERT INTO   FILE_NAME(   COLUMN_NAME_1, COLUMN_NAME_2) VALUES ( VALUE_1, VALUE_2 );");
+    char cmd_upper[CMD_SIZE] = {"INSERT INTO   FILE_NAME(   COLUMN_NAME_1, COLUMN_NAME_2) VALUES ( VALUE_1, VALUE_2 );"};
     int count = 0;
     int* pcnt = &count;
     cmd_analyze(cmd_upper, pcnt);
     ptr_d_debug("count is ", &count);
     CMD_DATA fdata[count];
+    // CMD_DATA 配列のdata をまとめて初期化する
+    for(int i = 0;i < count; i++) {
+        fdata[i].no = -1;
+        init_cmd(fdata[i].data);
+    }
     // --- A ここまで --- コマンド解析
     
     // 二次元配列を試してみる。
