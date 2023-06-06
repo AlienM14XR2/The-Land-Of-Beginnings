@@ -41,7 +41,34 @@ int test_two_dimensional_array() {
     // これも参考サンプルのまんま：）
     return 0;
 }
+int test_two_dimensional_array_func(int** top_of_cols);
+int test_two_dimensional_array_pointer_array() {
+    println("-------------------------------------- test_two_dimensional_array_pointer_array");
+    int square[ROWS][COLS] = {
+        {1,2,3,4},
+        {11,12,13,14}
+    };
+    
+    // ポインタ配列
+    int *top_of_cols[ROWS];
+    top_of_cols[0] = square[0];
+    top_of_cols[1] = square[1];
+    
+    ptr_d_debug("square[0][1]",&top_of_cols[0][1]);
+    ptr_d_debug("square[1][1]",&top_of_cols[1][1]);
+    
+    test_two_dimensional_array_func(top_of_cols);
+    
+    return 0;
 
+}
+int test_two_dimensional_array_func(int** top_of_cols) {
+    println("-------------------------------------- test_two_dimensional_array_func");
+    ptr_d_debug("square[0][1]",&top_of_cols[0][0]);
+    ptr_d_debug("square[1][1]",&top_of_cols[1][0]);
+    // 理解したよ、うん、スッキリした。
+    return 0;
+}
 int main(void) {
     println("START TWO DIMENSIONAL ARRAY ===============");
     if(1) {
@@ -53,6 +80,9 @@ int main(void) {
     }
     if(2) {
         test_two_dimensional_array();
+    }
+    if(3) {
+        test_two_dimensional_array_pointer_array();
     }
     println("=============== TWO DIMENSIONAL ARRAY END");
     return 0;
