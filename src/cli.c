@@ -37,6 +37,9 @@ void ptr_lf_debug(const char* message, double* debug) {
 void ptr_str_debug(const char* message, char* debug) {
     printf("%s\tvalue=%s\taddr=%p\n",message,debug,debug);
 }
+void ptr_cstr_debug(const char* message, const char* debug) {
+    printf("%s\tvalue=%s\taddr=%p\n",message,debug,debug);
+}
 
 int handler(char*);
 int cmd_exit(char*);
@@ -176,15 +179,18 @@ int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
 //
 // ここからテスト用関数です。
 //
-int test_split_string() {
+int test_split_string(const char* org_cmd) {
     println("--------------------------------------- test_split_string");
     // 区切り文字（Delimiter ）は決める必要がある。
     // ひと固まりの文字列がある。
     // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
     // 分割されたものは、各々配列に入れ直す。
     // --- A ここから --- コマンド解析
-    println("e.g. INSERT INTO   FILE_NAME(   COLUMN_NAME_1, COLUMN_NAME_2) VALUES ( VALUE_1, VALUE_2 );");
-    char cmd_upper[CMD_SIZE] = {"INSERT INTO   FILE_NAME(   COLUMN_NAME_1, COLUMN_NAME_2) VALUES ( VALUE_1, VALUE_2 );"};
+    ptr_cstr_debug("e.g. ",org_cmd);
+//    println("e.g. INSERT INTO   FILE_NAME(   COLUMN_NAME_1, COLUMN_NAME_2) VALUES ( VALUE_1, VALUE_2 );");
+//    char cmd_upper[CMD_SIZE] = {"INSERT INTO   FILE_NAME(   COLUMN_NAME_1, COLUMN_NAME_2) VALUES ( VALUE_1, VALUE_2 );"};
+    char cmd_upper[CMD_SIZE];
+    upper_str(org_cmd, cmd_upper);
     int count = 0;
     int* pcnt = &count;
     cmd_analyze(cmd_upper, pcnt);
@@ -195,17 +201,7 @@ int test_split_string() {
         fdata[i].no = -1;
         init_cmd(fdata[i].data);
     }
-    // --- A ここまで --- コマンド解析
-    
-    // 二次元配列を試してみる。
-//    char cmd_data[count][CMD_SPLIT_SIZE];
-//    for(int i = 0;i < count; i++) {
-//        init_cmd(cmd_data[i]);
-//    }
-//    char* pdata = &cmd_data[0];
-//    char** ppdata = &pdata;
-//    cmd_segment_array(cmd_upper, ppdata);
-    
+    // --- A ここまで --- コマンド解析    
     // --- B ここから --- コマンド分割
     // もう一度ループ解析して、今度は、動的に確保したCMD_DATA に分割したコマンドを代入していく。
     // まずは、分割文字列の取得、表示確認から。
@@ -216,6 +212,10 @@ int test_split_string() {
 //        ptr_str_debug("data is ",fdata[i].data);
         printf("no is %d\tdata is %s\n",fdata[i].no,fdata[i].data);
     }
+    return 0;
+}
+
+int test_get_data() {
     return 0;
 }
 int main(void) {
@@ -235,7 +235,12 @@ int main(void) {
     if(2) {     // 細々とした作り込みが必要な場合のテスト、動確のために用意した。
         // 文字列のスプリット、これが非常によかった、考え方のね。
         // https://qiita.com/IKEH/items/5f8a3047cfeee5c74574
-        test_split_string();
+        test_split_string("insert into   file_name(   col_name_1, col_name_2) values ( val_1, val_2 );");
+    }
+    if(3) {
+        // INSERT INTO を理解して動くものにする。(c1,c2,c3) vlues (v1,v2,v3)
+        // Column とValue のデータを正しく抜き出す。       
+        
     }
     if(0) {
         // CLI の無限ループ
