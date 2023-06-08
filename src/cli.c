@@ -217,7 +217,20 @@ int test_split_string(const char* org_cmd, CMD_DATA* pcmd) {
     return 0;
 }
 
-int test_get_data() {
+int test_get_cols_vals(const CMD_DATA* cmd_array) {
+    println("--------------------------------------- test_get_cols_vals");
+    // 最終的には三次元配列で管理したい。
+    // バイナリファイルに登録される正式なカラム名
+    // ユーザ入力されたカラム名
+    // ユーザ入力された値、みたいな：）、なんだやっぱり自宅は暑いな：）
+    for(int i = 0;;i++) {
+        if( cmd_array[i].no == -1 ) {
+            break;
+        }
+        if(strcmp("INTO",cmd_array[i].data) == 0) {
+            println("Hit.");
+        }
+    }
     return 0;
 }
 int main(void) {
@@ -257,9 +270,10 @@ int main(void) {
             if( cmd_array[i].no == -1 ) {
                 break;
             }
-            ptr_d_debug("no is ",&cmd_array[i].no);
-            ptr_str_debug("data is ",cmd_array[i].data);
+            ptr_d_debug("cmd_array no is ",&cmd_array[i].no);
+            ptr_str_debug("\tcmd_array data is ",cmd_array[i].data);
         }
+        test_get_cols_vals(cmd_array);
         
     }
     if(0) {
