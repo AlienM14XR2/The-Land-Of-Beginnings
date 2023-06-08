@@ -149,7 +149,8 @@ int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
     char tmp[CMD_SPLIT_SIZE] ={'\0'};
     int j = 0;
     int k = 0;
-    for(int i = 0;;i++) {
+    int limit = strlen(cmd_upper);
+    for(int i = 0; i < limit ;i++) {
         if(cmd_upper[i] != ' ' && cmd_upper[i] != ';' ) {
             tmp[j] = cmd_upper[i];
             j++;     
@@ -187,8 +188,6 @@ int test_split_string(const char* org_cmd) {
     // 分割されたものは、各々配列に入れ直す。
     // --- A ここから --- コマンド解析
     ptr_cstr_debug("e.g. ",org_cmd);
-//    println("e.g. INSERT INTO   FILE_NAME(   COLUMN_NAME_1, COLUMN_NAME_2) VALUES ( VALUE_1, VALUE_2 );");
-//    char cmd_upper[CMD_SIZE] = {"INSERT INTO   FILE_NAME(   COLUMN_NAME_1, COLUMN_NAME_2) VALUES ( VALUE_1, VALUE_2 );"};
     char cmd_upper[CMD_SIZE];
     upper_str(org_cmd, cmd_upper);
     int count = 0;
@@ -236,10 +235,12 @@ int main(void) {
         // 文字列のスプリット、これが非常によかった、考え方のね。
         // https://qiita.com/IKEH/items/5f8a3047cfeee5c74574
         test_split_string("insert into   file_name(   col_name_1, col_name_2) values ( val_1, val_2 );");
+        test_split_string("insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);");
     }
     if(3) {
         // INSERT INTO を理解して動くものにする。(c1,c2,c3) vlues (v1,v2,v3)
-        // Column とValue のデータを正しく抜き出す。       
+        // Column とValue のデータを正しく抜き出す。
+        // 分割文字を引数に持つ、ignore する文字を配列で引数に持つ、関数かな。       
         
     }
     if(0) {
