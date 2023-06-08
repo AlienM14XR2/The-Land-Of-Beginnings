@@ -180,7 +180,7 @@ int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
 //
 // ここからテスト用関数です。
 //
-int test_split_string(const char* org_cmd) {
+int test_split_string(const char* org_cmd, CMD_DATA* pcmd) {
     println("--------------------------------------- test_split_string");
     // 区切り文字（Delimiter ）は決める必要がある。
     // ひと固まりの文字列がある。
@@ -210,6 +210,9 @@ int test_split_string(const char* org_cmd) {
     for(int i = 0;i < count; i++) {
 //        ptr_str_debug("data is ",fdata[i].data);
         printf("no is %d\tdata is %s\n",fdata[i].no,fdata[i].data);
+        pcmd[i].no = fdata[i].no;
+        int len = strlen(fdata[i].data);
+        cmd_cpy(pcmd[i].data,fdata[i].data,len);
     }
     return 0;
 }
@@ -234,13 +237,29 @@ int main(void) {
     if(2) {     // 細々とした作り込みが必要な場合のテスト、動確のために用意した。
         // 文字列のスプリット、これが非常によかった、考え方のね。
         // https://qiita.com/IKEH/items/5f8a3047cfeee5c74574
-        test_split_string("insert into   file_name(   col_name_1, col_name_2) values ( val_1, val_2 );");
-        test_split_string("insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);");
+        CMD_DATA cmd_array[512] = {-1,'\0'};
+        test_split_string("insert into   file_name(   col_name_1, col_name_2) values ( val_1, val_2 );",cmd_array);
+        test_split_string("insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);",cmd_array);
     }
     if(3) {
         // INSERT INTO を理解して動くものにする。(c1,c2,c3) vlues (v1,v2,v3)
         // Column とValue のデータを正しく抜き出す。
         // 分割文字を引数に持つ、ignore する文字を配列で引数に持つ、関数かな。       
+        CMD_DATA cmd_array[512] = {-1,'\0'};
+        for(int i = 0;i < sizeof(cmd_array)/sizeof(cmd_array[0]);i++){
+            cmd_array[i].no = -1;
+            cmd_array[i].data[0] = '\0';
+        }
+        test_split_string("insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);",cmd_array);
+        // デバッグ
+        println("33333333333333333333333333333");
+        for(int i = 0;;i++){
+            if( cmd_array[i].no == -1 ) {
+                break;
+            }
+            ptr_d_debug("no is ",&cmd_array[i].no);
+            ptr_str_debug("data is ",cmd_array[i].data);
+        }
         
     }
     if(0) {
