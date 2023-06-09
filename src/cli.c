@@ -9,6 +9,19 @@
     
     　便利だと思ったのはMySQL に存在（PostgreSQL にもある）する、上下、↑、↓による、記憶
     　された、コマンドの表示だ。
+    　
+    　住所録や電話帳、個人情報といったものを当初管理することをイメージしていた。
+    　したがって、次のデータをテストサンプルとする。
+    ```　
+    　name, email, tel_1, tel_2, tel_3, address, memo
+    ```
+        これに、アプリ固有の情報を追加する
+    ```
+      id, create_at, update_at    
+    ```
+    2023-06-09 現在は上記を正式なカラム名にする。
+    
+    
     
     @Author Jack    
 */
@@ -69,12 +82,25 @@ int init_cmd(char* cmd) {
         cmd[i] = '\0';
     }
 }
+/**
+    これでは、問題があることに気付いた。
+  Values はユーザの任意なので、これを大文字に強制的に変換してしまうのは違う。
+  したがって、別途、Values 以降の（）内の値は無視するものが必要だ。
+    
+*/
 int upper_str(const char* in, char* out) {
     int i = 0;
     while(in[i] != '\0') {
         out[i] = toupper(in[i]);
         i++;
     }
+    return 0;
+}
+/**
+    仮引数 in を仮引数out に大文字にして保存する（返却する）関数。
+  keyword より先、start 文字からend 文字までは大文字変換を無視する。
+*/
+int upper_str_ignore(const char* in, char* out, const char* keyword, const char start, const char end) {
     return 0;
 }
 int init_io(char* cmd,char* cmd_upper) {
@@ -254,7 +280,11 @@ int main(void) {
         test_split_string("insert into   file_name(   col_name_1, col_name_2) values ( val_1, val_2 );",cmd_array);
         test_split_string("insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);",cmd_array);
     }
-    if(3) {
+    if(2.1) {
+//        int upper_str_ignore(const char* in, char* out, const char* keyword, const char start, const char end)
+        println("Yeah here we go. --- upper_str_ignore");
+    }
+    if(0) {
         // INSERT INTO を理解して動くものにする。(c1,c2,c3) vlues (v1,v2,v3)
         // Column とValue のデータを正しく抜き出す。
         // 分割文字を引数に持つ、ignore する文字を配列で引数に持つ、関数かな。       
