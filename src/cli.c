@@ -101,6 +101,11 @@ int upper_str(const char* in, char* out) {
   keyword より先、start 文字からend 文字までは大文字変換を無視する。
 */
 int upper_str_ignore(const char* in, char* out, const char* keyword, const char start, const char end) {
+    ptr_cstr_debug("keyword is ",keyword);
+    // まず、keyword を大文字にして、それでも比較できるようにする。
+    char upper_keyword[CMD_SPLIT_SIZE] = {"\0"};
+    upper_str(keyword,upper_keyword);
+    ptr_cstr_debug("upper_keyword is ",upper_keyword);
     return 0;
 }
 int init_io(char* cmd,char* cmd_upper) {
@@ -214,7 +219,7 @@ int test_split_string(const char* org_cmd, CMD_DATA* pcmd) {
     // 分割されたものは、各々配列に入れ直す。
     // --- A ここから --- コマンド解析
     ptr_cstr_debug("e.g. ",org_cmd);
-    char cmd_upper[CMD_SIZE];
+    char cmd_upper[CMD_SIZE];           // ここで全てを大文字に変換するのは良くない気がしている、スプリットした後に大文字変換できるものとできないものを区別する必要があるのではないのか？
     upper_str(org_cmd, cmd_upper);
     int count = 0;
     int* pcnt = &count;
@@ -242,7 +247,38 @@ int test_split_string(const char* org_cmd, CMD_DATA* pcmd) {
     }
     return 0;
 }
-
+int test_split_string_before_upper(const char* org_cmd, CMD_DATA* pcmd) {
+    println("----------------------- test_split_string_before_upper");
+    // 区切り文字（Delimiter ）は決める必要がある。
+    // ひと固まりの文字列がある。
+    // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
+    // 分割されたものは、各々配列に入れ直す。
+    // コマンド解析
+    ptr_cstr_debug("e.g. ",org_cmd);
+    int count = 0;
+    int* pcnt = &count;
+    cmd_analyze(org_cmd, pcnt);
+    ptr_d_debug("count is ", &count);
+    CMD_DATA fdata[count];
+    // CMD_DATA 配列のdata をまとめて初期化する
+    for(int i = 0;i < count; i++) {
+        fdata[i].no = -1;
+        init_cmd(fdata[i].data);
+    }
+    // コマンド分割
+    // もう一度ループ解析して、今度は、動的に確保したCMD_DATA に分割したコマンドを代入していく。
+    // まずは、分割文字列の取得、表示確認から。
+    cmd_segment(org_cmd, fdata);
+    // デバッグ最終確認
+    for(int i = 0;i < count; i++) {
+//        ptr_str_debug("data is ",fdata[i].data);
+        printf("no is %d\tdata is %s\n",fdata[i].no,fdata[i].data);
+        pcmd[i].no = fdata[i].no;
+        int len = strlen(fdata[i].data);
+        cmd_cpy(pcmd[i].data,fdata[i].data,len);
+    }
+    return 0;
+}
 int test_get_cols_vals(const CMD_DATA* cmd_array) {
     println("--------------------------------------- test_get_cols_vals");
     // 最終的には三次元配列で管理したい。
@@ -282,7 +318,14 @@ int main(void) {
     }
     if(2.1) {
 //        int upper_str_ignore(const char* in, char* out, const char* keyword, const char start, const char end)
+//        CMD_DATA cmd_array[512] = {-1,'\0'};
+//        test_split_string("insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);",cmd_array);
+        char sample[] = {"insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);"};
+        CMD_DATA cmd_array[512] = {-1,'\0'};
         println("Yeah here we go. --- upper_str_ignore");
+        test_split_string_before_upper(sample, cmd_array);
+        char out[CMD_SIZE] = {"\0"}; 
+        upper_str_ignore(sample, out, "values", '(', ')');
     }
     if(0) {
         // INSERT INTO を理解して動くものにする。(c1,c2,c3) vlues (v1,v2,v3)
