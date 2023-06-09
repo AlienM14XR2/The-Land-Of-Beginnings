@@ -96,18 +96,6 @@ int upper_str(const char* in, char* out) {
     }
     return 0;
 }
-/**
-    仮引数 in を仮引数out に大文字にして保存する（返却する）関数。
-  keyword より先、start 文字からend 文字までは大文字変換を無視する。
-*/
-int upper_str_ignore(const char* in, char* out, const char* keyword, const char start, const char end) {
-    ptr_cstr_debug("keyword is ",keyword);
-    // まず、keyword を大文字にして、それでも比較できるようにする。
-    char upper_keyword[CMD_SPLIT_SIZE] = {"\0"};
-    upper_str(keyword,upper_keyword);
-    ptr_cstr_debug("upper_keyword is ",upper_keyword);
-    return 0;
-}
 int init_io(char* cmd,char* cmd_upper) {
     printf("ORx2> ");    
     init_cmd(cmd);
@@ -207,6 +195,35 @@ int cmd_segment(const char* cmd_upper, CMD_DATA* fdata) {
     }
     return 0;
 }
+/**
+    仮引数 in を仮引数out に大文字にして保存する（返却する）関数。
+  keyword より先、start 文字からend 文字までは大文字変換を無視する。
+*/
+int upper_str_ignore(CMD_DATA* cmd_array, char* out, const char* keyword, const char start, const char end) {
+    ptr_cstr_debug("keyword is ",keyword);
+    // まず、keyword を大文字にして、それでも比較できるようにする。
+    char upper_keyword[CMD_SPLIT_SIZE] = {"\0"};
+    upper_str(keyword,upper_keyword);
+    ptr_cstr_debug("\tupper_keyword is ",upper_keyword);
+    
+    int ignore = 0;
+    for(int i=0;;i++) {
+        if( cmd_array[i].no == -1 ) {
+            break;
+        }
+        ptr_str_debug("cmd_array data is ",cmd_array[i].data);
+        if( strcmp(keyword,cmd_array[i].data) == 0 || strcmp(upper_keyword,cmd_array[i].data) == 0 ) {
+            println("Hit values or VALUES.");
+            // フラグ管理になっちった。後、start いらないかも：）
+            // うん、ここはもっと考察が必要だな、まだ見当がついていない。
+            //　簡単にできる方法を見つける、一文字づつUpper しているので、コマンド改変になるが、変換無効のシステム予約文字みたいのを埋め込むか、それ以外か。少し時間がほしい。
+//            out[i] = toupper(in[i]);
+            ignore = 1;
+        }
+    }
+    return 0;
+}
+
 
 //
 // ここからテスト用関数です。
@@ -231,12 +248,10 @@ int test_split_string(const char* org_cmd, CMD_DATA* pcmd) {
         fdata[i].no = -1;
         init_cmd(fdata[i].data);
     }
-    // --- A ここまで --- コマンド解析    
     // --- B ここから --- コマンド分割
     // もう一度ループ解析して、今度は、動的に確保したCMD_DATA に分割したコマンドを代入していく。
     // まずは、分割文字列の取得、表示確認から。
     cmd_segment(cmd_upper, fdata);
-    // --- B ここまで --- コマンド分割
     // デバッグ最終確認
     for(int i = 0;i < count; i++) {
 //        ptr_str_debug("data is ",fdata[i].data);
@@ -249,10 +264,6 @@ int test_split_string(const char* org_cmd, CMD_DATA* pcmd) {
 }
 int test_split_string_before_upper(const char* org_cmd, CMD_DATA* pcmd) {
     println("----------------------- test_split_string_before_upper");
-    // 区切り文字（Delimiter ）は決める必要がある。
-    // ひと固まりの文字列がある。
-    // Delimiter で分割する。（オリジナルはそのままにしておく、cmd_upper ならそのまま編集してもいいか：）
-    // 分割されたものは、各々配列に入れ直す。
     // コマンド解析
     ptr_cstr_debug("e.g. ",org_cmd);
     int count = 0;
@@ -266,12 +277,9 @@ int test_split_string_before_upper(const char* org_cmd, CMD_DATA* pcmd) {
         init_cmd(fdata[i].data);
     }
     // コマンド分割
-    // もう一度ループ解析して、今度は、動的に確保したCMD_DATA に分割したコマンドを代入していく。
-    // まずは、分割文字列の取得、表示確認から。
     cmd_segment(org_cmd, fdata);
     // デバッグ最終確認
     for(int i = 0;i < count; i++) {
-//        ptr_str_debug("data is ",fdata[i].data);
         printf("no is %d\tdata is %s\n",fdata[i].no,fdata[i].data);
         pcmd[i].no = fdata[i].no;
         int len = strlen(fdata[i].data);
@@ -308,6 +316,8 @@ int main(void) {
         ptr_d_debug("px is ",px);
         ptr_lf_debug("pp is ",pp);
         ptr_str_debug("str is ",str);
+        const char foo[] = {"It's Foo.\0"};
+        ptr_cstr_debug("const char is foo ",foo);
     }
     if(2) {     // 細々とした作り込みが必要な場合のテスト、動確のために用意した。
         // 文字列のスプリット、これが非常によかった、考え方のね。
@@ -322,10 +332,14 @@ int main(void) {
 //        test_split_string("insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);",cmd_array);
         char sample[] = {"insert into file_name(col_1,col_2,col_3) values (val_1, val_2, val_3);"};
         CMD_DATA cmd_array[512] = {-1,'\0'};
+        for(int i = 0;i < sizeof(cmd_array)/sizeof(cmd_array[0]);i++){
+            cmd_array[i].no = -1;
+            cmd_array[i].data[0] = '\0';
+        }
         println("Yeah here we go. --- upper_str_ignore");
         test_split_string_before_upper(sample, cmd_array);
         char out[CMD_SIZE] = {"\0"}; 
-        upper_str_ignore(sample, out, "values", '(', ')');
+        upper_str_ignore(cmd_array, out, "values", '(', ')');
     }
     if(0) {
         // INSERT INTO を理解して動くものにする。(c1,c2,c3) vlues (v1,v2,v3)
@@ -347,7 +361,6 @@ int main(void) {
             ptr_str_debug("\tcmd_array data is ",cmd_array[i].data);
         }
         test_get_cols_vals(cmd_array);
-        
     }
     if(0) {
         // CLI の無限ループ
