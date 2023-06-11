@@ -97,6 +97,7 @@ int init_cmd(char* cmd) {
     for(int i = 0; i < sizeof(cmd)/sizeof(cmd[0]); i++) {
         cmd[i] = '\0';
     }
+    return 0;
 }
 /**
     これでは、問題があることに気付いた。
