@@ -8,6 +8,21 @@ for 文
 goto 文
 switch 文
 
+#include ディレクティブは「おまえの代わりに、与えられたファイルの内容をペーストせよ」という意味だ。
+ファイル名は２重引用符で囲むか（#include "file.h"）、あるいは山カッコで囲む（#include <stdio.h>）
+
+・ 山カッコの場合は、ファイルを定義済みのディレクトリ集合からサーチせよ、という意味になる。GCC では通常、こうなっている。
+- /usr/local/include
+- <libdir>/gcc/target/version/include
+    ここで<libdir>というのは、GCC の設定でライブラリを入れるためのディレクトリで、通常はデフォルトにより、 /usr/lib または、 /usr/local/lib である。
+    
+- /usr/target/include
+- /usr/include
+    コンパイル時に -I オプションを使えば、このリストにディレクトリを追加できる。 @see man cpp や GNU cpp の英文ドキュメント[115]を参照。
+    
+・２重引用符の場合、カレントディレクトリからもファイルがサーチされる。
+
+
 e.g. compile
 ```
 gcc -o ../bin/main -std=c11 -pedantic-errors -Wall -Werror chapter_8.c
