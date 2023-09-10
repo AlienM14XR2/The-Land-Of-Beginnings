@@ -16,6 +16,11 @@
 #include "stdio.h"
 #include "stdbool.h"
 
+int first(int array[], size_t sz);
+int first_v2(int* array, size_t sz);
+int first_v3(int* array, size_t sz);
+int first_v4(int array[10], size_t sz);
+int first_v5(int array[static 10], size_t sz);
 int main(void) {
     puts("第９章     型システム ===");
     if(9) {
@@ -98,8 +103,86 @@ int main(void) {
                     printf("array[%d] is %ld \n",i,array[i]);
                 }
             }
+            if(7) { // 9.1.7
+                /*
+                                            関数の引数としての配列
+                                            配列を引数として受け取る関数について考えてみよう。
+                                            配列の最初の要素を返す（もし配列が空ならば、-1 を返す）。
+                */
+                puts("関数の引数としての配列 ---------");
+                int arr[] = {1,2,3,4,5,6};
+                // size_t これは  aka long unsigned int 
+                size_t sz = sizeof(arr)/sizeof(arr[0]);    // この記述は配列のサイズが決定している場合のみ有効。
+                printf("sz is %ld \n",sz);
+                int ret = first(arr,sz);
+                printf("ret is %d \n",ret);
+                ret = first_v2(arr,sz);
+                printf("ret is %d \n",ret);
+                ret = first_v3(arr,sz);
+                printf("ret is %d \n",ret);
+                
+                int arr2[] = {10,20,30,40,50,60,70,80,90,100};
+                sz = sizeof(arr2)/sizeof(arr2[0]);
+                printf("sz is %ld \n",sz);
+                puts("関数定義において無意味な例");
+                ret = first_v4(arr2,sz);    // この関数定義は無意味だということ。
+                printf("ret is %d \n",ret);
+                puts("関数定義において意味あり");
+                ret = first_v5(arr2,sz);    // C99 で導入された配列の範囲を規定したもの。
+                printf("ret is %d \n",ret);
+                
+                // C99 で導入された配列の面白い初期化方法の例
+                puts("C99 で導入された配列の面白い初期化方法");
+                int a[8] = {[1]=15,[5]=29}; // 要素数 1 は 15 で 要素数 5 は 29 で初期化され他は 0 で初期化される。
+                for(int i=0; i<8; i++) {
+                    printf("a[%d] is %d \n",i,a[i]);
+                }
+                
+            }
         }
     }
     return 0;
+}
+/*
+    配列の最初の要素を返す（もし配列が空ならば、-1 を返す）。
+*/
+int first(int array[], size_t sz) {
+    if(sz == 0) return -1;
+    return array[0];
+}
+
+/*
+    配列の最初の要素を返す（もし配列が空ならば、-1 を返す）。
+    上の関数の第１仮引数をポインタで表現しただけ、振る舞いは同じ。
+*/
+int first_v2(int* array, size_t sz) {
+    if(sz == 0) return -1;
+    return *array;
+}
+/*
+    配列の最初の要素を返す（もし配列が空ならば、-1 を返す）。
+    上の関数の第１仮引数をポインタで表現しただけ、振る舞いは同じ。
+  first 関数と first_v2 関数の混在させたもの。
+    配列は内部でポインタを利用した特殊な型とも言える。
+*/
+int first_v3(int* array, size_t sz) {
+    if(sz == 0) return -1;
+    return array[0];
+}
+/*
+        そもそも配列は、実行時にもコンパイル時にも、範囲チェックを実行しない。（バッファオーバーフロー）
+        次の関数の記述は単なるコメントに過ぎない。
+*/
+int first_v4(int array[10], size_t sz) {
+    if(sz == 0) return -1;
+    return array[0];
+}
+/*
+    C99 で導入された特別な構文を利用したもの。
+        このように記述すると、コンパイラは、その約束を前提とした特別な最適化を実行できるようになる。  
+*/
+int first_v5(int array[static 10], size_t sz) {
+    if(sz == 0) return 0;
+    return array[0];
 }
 
