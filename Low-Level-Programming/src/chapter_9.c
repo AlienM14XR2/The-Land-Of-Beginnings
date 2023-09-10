@@ -21,6 +21,7 @@ int main(void) {
     if(9) {
         if(1) {
             if(1) { // 9.1.1 数値型
+                puts("数値型 ---------");
                 // 2 の 48 乗
                 printf("1L << 48 is %ld \n",(1L << 48));    // これは int 型で 8 Bytes という解釈がされる。
                // printf("1 << 48 is %d \n",(1 << 48));  // これは int 型で 4 Bytes という解釈がされる。（コンパイルエラー ... コンパイルオプション '-Werror'。）
@@ -38,6 +39,7 @@ int main(void) {
                     C は型キャスト（型変換）を比較的自由に行うことができる。
                                             そのためには、新しい型の名前をカッコに入れて、変換したい式の前に書く必要がある。
                 */
+                puts("型キャスト ---------");
                 int a = 4;
                 double b = 10.5 * (double)a;
                 printf("a is %d \n",a);
@@ -57,6 +59,7 @@ int main(void) {
                     C89 にブール型がないことは、すでに指摘した。けれども C99 でブール型が、_Bool という型名で導入された。stdbool.h をインクルードすれば true false の値と、
                     bool という型をアクセスできるようになる... 中略 ... 極力 _Bool ではなく bool を使おう。
                 */
+                puts("ブール型 ---------");
                 bool bflg = true;
                 if(bflg) {
                     puts("you should include stdbool.h");
@@ -69,10 +72,31 @@ int main(void) {
                                             確かに、void* だった場合、デリファレンスは困難、自明とはいかない。
                                            
                 */
+                puts("ポインタ ---------");
                 int a = 10;
                 void* pa = &a;
                 // このようなことが事前に分かっていたら次のように書ける。
                 printf("pa is %d \n",*((int*)pa));
+            }
+            if(6) { // 9.1.6
+                /*
+                                            配列
+                   C の配列（array）は、固定数の同じ型のデータを入れる構造だ。だから配列を扱う上で知る必要があるのは、その先頭アドレスと、１個の要素サイズと、配列の長さ
+                                        （格納できる要素の上限）である。配列宣言を２つ、次に示す。
+                                            
+                */
+                puts("配列 ---------");
+                int arr[] = {1,2,3,4,5};   // この配列のサイズはコンパイラによって計算される。
+                long size = sizeof(arr)/sizeof(arr[0]);
+                printf("size is %ld \n",size);
+                for(int i=0; i<size; i++) {
+                    printf("arr[%d] is %d \n",i,arr[i]);
+                }
+                
+                long array[32] = {0};   // この配列は 0 で初期化される。全体のサイズは 256 バイト（8 * 32）。
+                for(int i=0; i<32; i++) {
+                    printf("array[%d] is %ld \n",i,array[i]);
+                }
             }
         }
     }
