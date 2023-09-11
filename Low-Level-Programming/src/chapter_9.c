@@ -131,6 +131,8 @@ int main(void) {
                 ret = first_v5(arr2,sz);    // C99 で導入された配列の範囲を規定したもの。
                 printf("ret is %d \n",ret);
                 
+            }
+            if(8) { // 9.1.8
                 // C99 で導入された配列の面白い初期化方法の例
                 puts("C99 で導入された配列の面白い初期化方法");
                 int a[8] = {[1]=15,[5]=29}; // 要素数 1 は 15 で 要素数 5 は 29 で初期化され他は 0 で初期化される。
@@ -138,6 +140,29 @@ int main(void) {
                     printf("a[%d] is %d \n",i,a[i]);
                 }
                 
+                // 配列の初期化の順序は意味を持たない。これは列挙値やキャラクタの値をインデックスとして使うときに便利。
+                int whitespace[32] = {
+//                    [' ' ] = 1,   // これは gcc ではコンパイルエラーになった：）
+                    ['\t'] = 1,
+                    ['\f'] = 1,
+                    ['\n'] = 1,
+                    ['\r'] = 1
+                };
+                for(int i=0; i<32; i++) {
+                    printf("whitespace[%d] is %d \n",i,whitespace[i]);
+                }
+                puts("--- colors");
+                enum colors {
+                    RED,
+                    GREEN,
+                    BLUE,
+                    MAGENTA,
+                    YELLOW
+                };
+                
+                int good[5] = {[RED]=1,[MAGENTA]=4};
+                printf("good[RED] is %d \n",good[RED]);
+                printf("good[MAGENTA] is %d \n",good[MAGENTA]);
             }
         }
     }
