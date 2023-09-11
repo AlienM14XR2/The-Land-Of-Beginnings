@@ -21,6 +21,7 @@ int first_v2(int* array, size_t sz);
 int first_v3(int* array, size_t sz);
 int first_v4(int array[10], size_t sz);
 int first_v5(int array[static 10], size_t sz);
+
 int main(void) {
     puts("第９章     型システム ===");
     if(9) {
@@ -163,6 +164,15 @@ int main(void) {
                 int good[5] = {[RED]=1,[MAGENTA]=4};
                 printf("good[RED] is %d \n",good[RED]);
                 printf("good[MAGENTA] is %d \n",good[MAGENTA]);
+            }
+            if(9) { // 9.1.9 型の別名
+                puts("型の別名");
+                typedef unsigned short int mytype_t;   // _t で終わる名前は、すべて POSIX 標準によって予約されているためいい名前とは言えない
+                mytype_t a = 65535;
+                printf("a is %d \n",a);
+                // size_t ... unsigned long の別名なので、Intel 64 では符号なし 8 バイトの整数になるのが典型である。
+                // 配列のインデックスにはこれを利用し、int を使用すべきではない。
+                // 私はインクルードしてはいないが、stddef.h などの標準ライブラリをインクルードして利用する場合もある。
             }
         }
     }
