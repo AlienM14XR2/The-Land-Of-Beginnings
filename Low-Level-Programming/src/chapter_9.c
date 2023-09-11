@@ -141,14 +141,14 @@ int main(void) {
                 }
                 
                 // 配列の初期化の順序は意味を持たない。これは列挙値やキャラクタの値をインデックスとして使うときに便利。
-                int whitespace[32] = {
-//                    [' ' ] = 1,   // これは gcc ではコンパイルエラーになった：）
-                    ['\t'] = 1,
-                    ['\f'] = 1,
-                    ['\n'] = 1,
-                    ['\r'] = 1
+                int whitespace[32+1] = {
+                    [' ' ] = 1,
+                    ['\t'] = 2,
+                    ['\f'] = 3,
+                    ['\n'] = 4,
+                    ['\r'] = 5
                 };
-                for(int i=0; i<32; i++) {
+                for(int i=0; i<33; i++) {
                     printf("whitespace[%d] is %d \n",i,whitespace[i]);
                 }
                 puts("--- colors");
