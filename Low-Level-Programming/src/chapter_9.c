@@ -19,10 +19,11 @@
 int first(int array[], size_t sz);
 int first_v2(int* array, size_t sz);
 int first_v3(int* array, size_t sz);
-int first_v4(int array[10], size_t sz);
-int first_v5(int array[static 10], size_t sz);
+int first_v4(int array[10], size_t sz);         // これは意味なし、ただのコメントに過ぎない。
+int first_v5(int array[static 10], size_t sz);  // これは意味あり、要素数 10 というようにコンパイラが解釈する。
+void sub_test_sizeof(int const arr[]);
 
-int main(void) {
+int main(int argc, char* argv[]) {  // @see 9.1.10 main 関数の引数
     puts("第９章     型システム ===");
     if(9) {
         if(1) {
@@ -174,6 +175,31 @@ int main(void) {
                 // 配列のインデックスにはこれを利用し、int を使用すべきではない。書籍の中ではもっと激しい言い方だった『配列のインデックスに int を使うな！』。
                 // 私はインクルードしてはいないが、stddef.h などの標準ライブラリをインクルードして利用する場合もある。
             }
+            if(10) {    // 9.1.10 main 関数の引数
+                puts("main 関数の引数");
+                // 実行時に与えられた全部の引数を、それぞれ別の行でプリントする。
+                int i;  // 前の項目で size_t を使えと言っときながら、ここでは int を使っている本書が少し面白い：） つまりはその常識的な範疇で判断せよってことかな。
+                for(i=0; i<argc; i++) {
+                    puts(argv[i]);
+                }
+            }
+            if(11) {    // 9.1.11 sizeof 演算子
+                puts("sizeof 演算子");
+                long array[] = {1,2,3};
+                // 配列の全体のサイズを求めることができる。
+                // 書式指定子 %zu これ知らなかった。C99 から size_t のために %zu という指定子が使えるようになった。
+                // それより前のバージョンでは unsigned long を意味する %lu を使うべきである。
+                printf("array is %zu \n",sizeof(array));
+                // 配列の一個のサイズを求めることもできる。
+                printf("arra[0] is %lu \n",sizeof(array[0]));
+                
+                // 次の問題は経験則から知っていたこと。関数の仮引数では上記と同様のことはできない ... ポインタは全部同じサイズにしかならない。
+                // gcc -o ../bin/main -std=c11 -pedantic-errors -Wall -Werror chapter_9.c
+                // warning も error になるのでこれを確認するためにはコンパイルオプションを変更しないとできない。次のようにコンパイルオプションを変更した。
+                // gcc -o ../bin/main -std=c11 -pedantic-errors -Wall chapter_9.c
+                const int arr[] = {1,2,3,4};
+                sub_test_sizeof(arr);
+            }
         }
     }
     return 0;
@@ -219,5 +245,13 @@ int first_v4(int array[10], size_t sz) {
 int first_v5(int array[static 10], size_t sz) {
     if(sz == 0) return 0;
     return array[0];
+}
+/*
+        関数が仮引数として受け取った配列のサイズを sizeof 演算子を用いて求めることは
+        できないという例題サンプル。
+*/
+void sub_test_sizeof(int const arr[]) {
+    printf("arr is %zu \n",sizeof(arr));        // 64 ビット機では 8 が出力される。
+    printf("arr[0] is %zu \n",sizeof(arr[0]));  // 4 が出力される。
 }
 
