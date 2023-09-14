@@ -199,7 +199,115 @@ int main(int argc, char* argv[]) {  // @see 9.1.10 main 関数の引数
                 // gcc -o ../bin/main -std=c11 -pedantic-errors -Wall chapter_9.c
                 const int arr[] = {1,2,3,4};
                 sub_test_sizeof(arr);
+                
+                /**
+                                            課題
+                    sizeof(void) を調べる。
+                    void は調べられなかった、コンパイルエラー。
+                */
+                printf("sizeof(void*) is %zu \n",sizeof(void*));
+                /**
+                                            課題
+                    sizeof(0) を調べる。
+                */
+                printf("sizeof(0) is %zu \n",sizeof(0));
+                /**
+                                            課題
+                    sizeof('X') を調べる。
+                */
+                printf("sizeof('X') is %zu \n",sizeof('X'));
+                printf("sizeof('x') is %zu \n",sizeof('x'));
+                /**
+                                            課題
+                    x の値はどうなるだろうか ... int だから 4 だと思う。
+                    int x = 10;
+                    size_t t = sizeof(x=90);
+                */
+                if(160) {
+                    int x = 10;
+                    size_t t = sizeof(x=90);
+                    printf("t is %zu \n", t);
+                }
+                /**
+                                            課題
+                                            配列に含まれている要素の数を、 sizeof を使って計算する方法は？
+                                            はい、これも経験則で知っている。
+                */
+                if(161) {
+                    int array[] = {1,2,3,4,5,6,7,8,9,10};
+                    size_t sz = sizeof(array)/sizeof(array[0]);
+                    printf("array size is %zu \n",sz);
+                }
+                
             }
+            if(11) {    // 9.1.12 定数型
+                puts("9.1.12 定数型 ========= ");
+                if("9-20") {
+                    puts("9-20 --- ");
+                    int a;  // 宣言だけして初期化はなし。
+                    a = 42; // ここで代入している。これは問題なし、OK。
+                    printf("a is %d \n",a);
+                    // const int b // これはコンパイルエラーになる。定数は、必ず初期化する必要がある。
+                    
+                    const int c = 36;
+                    // c = 99;        // コンパイルエラー、定数は変更できない。
+                    printf("c is %d \n",c);
+                    
+                    // const int === int const
+                    const int d = 33;   // 私はこっちが好きだし、見慣れている。
+                    int const f = 66;
+                    printf("d is %d \n",d);
+                    printf("f is %d \n",f);
+                    
+                    /**
+                                                    この const という修飾子とアスタリスク（*）修飾子との関係は、注目に値する。
+                                                    型は右から左に向けて読む規則があるので、const 修飾子も、アスタリスクも、この順序で適用される。
+                                                    その選択肢をあげる。
+                                                    
+                       int const* x は、「変更不可能」な int への、変更可能なポインタ x という意味だ。
+                                                    したがって、 *x = 10 は許されないが、 x そのものの変更は許される。代替の構文は、const int* x である。
+                                                        
+                    */
+                    int g = 9;
+                    int h = 10;
+                    const int* pg = &g;
+                    printf("*pg value is \t %d address is \t %p \n",*pg,(void*)pg);
+                    printf("g value is   \t %d address is \t %p \n",g,(void*)&g);
+                    // *pg = 10;    // コンパイルエラーになる。
+                    pg = &h;        // これは問題ない、OK。
+                    printf("*pg value is \t %d address is \t %p \n",*pg,(void*)pg);
+                    printf("h value is   \t %d address is \t %p \n",h,(void*)&h);
+                    
+                    /**
+                        int* const x = &y; の x は、「変更可能な  int y への、変更不可能なポインタ」である。
+                                                       言い換えると、x は y 以外のものを指し示すことができない。
+                    */
+                    if(1) {
+                        int y = 300;
+                        int yy = 600;
+                        int* const x = &y;
+                        printf("*x value is \t %d address is \t %p \n",*x,(void*)x);
+                        // x = &yy;    // コンパイルエラーになる。
+                        *x = 301;      // これは問題なし、OK。
+                        printf("*x value is \t %d address is \t %p \n",*x,(void*)x);
+                    }                    
+                    /**
+                                                    上 2 つのケースを重ねた、int const* const x = &y; は、「変更不可能な int y への、変更不可能なポインタ」を作る。
+                    */
+                    if(1) {
+                        int y = 303;
+                        int yy = 606;
+                        // この書き方のほうが好きなんだけど。
+                        const int* const x = &y;
+                        printf("*x value is \t %d address is \t %p \n",*x,(void*)x);               
+                        // x = &yy;    // コンパイルエラーになる。
+                        // *x = 304;   // コンパイルエラーになる。
+                        
+                    }
+                    
+                }
+            }
+
         }
     }
     return 0;

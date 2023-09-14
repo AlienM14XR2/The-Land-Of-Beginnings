@@ -28,5 +28,5 @@ gcc float_reinterpret.c -o ../bin/main
 // 今回の学習を経て上記のコンパイルオプションを利用した場合
 gcc -o main -ansi -pedantic-errors -Wall -Werror float_reinterpret.c
 ```
-「コンパイル 2」 のコンパイルオプションを付けたものはエラーとなり実行ファイルは作られない。
+「コンパイル 2」 のコンパイルオプションを付けたものは warning がエラーとなり実行ファイルは作られない。
 
