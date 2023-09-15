@@ -325,6 +325,14 @@ int main(int argc, char* argv[]) {  // @see 9.1.10 main 関数の引数
                     printf("after x value is %d \n",x);
                 }
             }
+            if(13) {    // 9.1.13 文字列型
+                /**
+                    c++ では （c と違って）文字リテラルの型が、char const* (const char* と同意)に矯正される。
+                                            コ ードの移植性を考えるなら、この型を使うほうが良いだろう。
+                                            いつでも可能な限り const char* 変数に代入すべきだ。（私はそうしているよ：）
+                    C では文字リテラルの型は、char* である。
+                */
+            }
         }
     }
     return 0;
