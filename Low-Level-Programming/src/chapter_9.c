@@ -16,12 +16,24 @@
 #include "stdio.h"
 #include "stdbool.h"
 
+typedef void(proc)(void);                       // 関数型を typedef で隠蔽する書き方。 これで proc という別名の関数型の利用ができる。
+                                                // @see 9-27 e.g. proc* my_proc = &some_proc
+                                                // これは関数宣言にも使えるとのこと。
+typedef int (func)(const char*);
+func myfunc;                                    // typedef で別名として扱われる関数型を用いた関数宣言。
+int myfunc(const char*);                        // プロトタイプ宣言。
+void proc_a(void);
+void proc_b(void);
 int first(int array[], size_t sz);
 int first_v2(int* array, size_t sz);
 int first_v3(int* array, size_t sz);
 int first_v4(int array[10], size_t sz);         // これは意味なし、ただのコメントに過ぎない。
 int first_v5(int array[static 10], size_t sz);  // これは意味あり、要素数 10 というようにコンパイラが解釈する。
 void sub_test_sizeof(int const arr[]);
+double g(int number);                           // 関数型のサンプルに利用している。
+double apply(double (f)(int), int);             // 関数型のサンプル、関数ポインタの利用。この書き方は個人的には嫌い、分かりづらいから。
+double apply_v2(double (*f)(int), int);         // 関数型のサンプル、関数ポインタの利用。この書き方の方が好き、少なくとも関数型であることが多少は分かりやすいから。（ポインタ利用しているので。
+
 
 int main(int argc, char* argv[]) {  // @see 9.1.10 main 関数の引数
     puts("第９章     型システム ===");
@@ -333,10 +345,60 @@ int main(int argc, char* argv[]) {  // @see 9.1.10 main 関数の引数
                     C では文字リテラルの型は、char* である。
                 */
             }
+            if(14) {    // 9.1.13 関数型
+                /**
+                                        ほとんどの型と違って、変数として実体化することができず、関数そのものが、この型のリテラルたとも言える。
+                                        関数型の引数を持つ関数の宣言は可能であり、その引数は自動的に関数ポインタへと変換される。
+                */
+                puts("関数型 ========= ");
+                if("9-24") {
+                    puts("9-24 ---");
+                    printf("apply(g,10) is %lf \n",apply(g,10));
+                }
+                if("9-25") {
+                    puts("9-25 ---");
+                    printf("apply_v2(g,10) is %lf \n",apply_v2(g,10));
+                }
+                /**
+                    typedef で関数型を隠蔽する場合はあまり抽象化すべきではないというお話。
+                                            せめて次のように書こう。
+                */
+                if("9-27") {
+                    puts("9-27 ---");
+                    proc* my_proc = &proc_a;
+                    my_proc();
+                    my_proc = &proc_b;
+                    my_proc();
+                }
+                if("9-28") {
+                    puts("9-28 ---");
+                    myfunc("myfunc");     // @see typedef int(func)(const char*);
+                }
+            }
         }
     }
     return 0;
 }
+double g(int number) {
+    return 0.5 + number;
+}
+double apply(double (f)(int), int x) {
+    return f(x);
+}
+double apply_v2(double (*f)(int), int x) {
+    return f(x);
+}
+void proc_a(void) {
+    puts("proc_a.");
+}
+void proc_b(void) {
+    puts("proc_b.");
+}
+int myfunc(const char* str) {
+    printf("%s \n",str);
+    return 0;
+}
+
 /*
     配列の最初の要素を返す（もし配列が空ならば、-1 を返す）。
 */
