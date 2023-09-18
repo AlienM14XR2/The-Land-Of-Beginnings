@@ -113,6 +113,72 @@ int main(void) {
             struct pair p = {.a='A'};
             printf("a is %c\tb is %d\n",p.a,p.b);
         }
-    }
+        /**
+                            共用体（union）は、構造体とよく似ているが、フィールドが必ず重複する（構造体は、フィールドが重複しない）。
+                            言い換えると、共用体のすべてのフィールドは同じアドレスから始まるのだ。共用体の名前空間は構造体および列挙型と共通している。
+        */
+        puts("9.2.2 共用体 ---------");
+        if("9-45") {
+            puts("9-45 ---");
+            union dword {
+                int integer;
+                short shorts[2];
+            };
+            union dword test;
+            test.integer = 0xAABBCCDD;
+            /**
+                                    今定義した共用体は、（x86 または x64 アーキテクチャで）サイズが 4 バイトとなる数を格納する。
+                                    そのデータは、２つの数（それぞれ２バイト幅）からなる配列にも、同時に格納される。
+                                    つまり、２つのフィールド（４バイトの.integer と ２バイト x２の.shorts 配列）は、重複する。
+                                    前者を変更すれば、後者も変更される。
+            */
+            printf("integer is %x\tshorts[0] is %x\tshorts[1] is %x\n",test.integer,test.shorts[0],test.shorts[1]); // リトルエンディアン：データをバイト単位で配置する際のやり方のひとつで「最後のバイトからデータを並べる」やり方
+        }
+        if("9-46") {
+            puts("9-46 ---");
+            /**
+                                    構造体と共用体を組み合わせると面白い結果が得られる。
+                                    次の例は、３バイトの構造体の各部をインデックス参照する方法を示している。
+                                    ただし、型のサイズによっては、構造体のフィールド間に生じるギャップのせいで、うまく
+                                    いかない可能性がある。
+            */
+            union pixel {
+                struct {
+                    char a,b,c;
+                };
+                char at[3];
+            };
+            union pixel pix = {.a=2,.b=4,.c=6};
+            printf("a is %d\tb is %d\t c is %d\n",pix.a,pix.b,pix.c);
+            for(int i=0; i<3; i++) {
+                printf("at[%d] is %d\n",i,pix.at[i]);
+            }
+        }
+        if("9-47") {
+            puts("9-47 ---");
+            /**
+                                    一般に、共用体のどれかのフィールドに値を代入したら、他のフィールドの値について標準は何も保証しない。
+                                    ただし、どちらも同じフィールドシーケンスを先頭に持つ２つの構造体ならば例外である。
+            */
+            struct sa {
+                int x;
+                char y;
+                char z;
+            };
+            struct sb {
+                int x;
+                char y;
+                int notz;
+            };
+            union test {
+                struct sa as_sa;
+                struct sb as_sb;
+            };
+            union test t = {.as_sa={300,1,2}};
+            printf("as_sa.x is %d\tas_sa.y is %d\tas_sa.z is %d\n",t.as_sa.x,t.as_sa.y,t.as_sa.z);
+            printf("as_sb.x is %d\tas_sb.y is %d\tas_sb.notz is %d\n",t.as_sb.x,t.as_sb.y,t.as_sb.notz);
+        }
+
+   }
     return 0;
 }
