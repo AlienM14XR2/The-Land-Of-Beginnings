@@ -47,6 +47,35 @@ int main(void) {
                                     これは、個人的には何とも言えない。ソースで実際に書いてみれば分かるが、結局その変数がなんなのかということは
                                     読み込む必要があり、struct tag名だろうと、typedef struct {} FOO; だろうと大差はないと思っている。 
             */
+            
+            // ちょっとだけポインタに関して復習だ。
+            // 次をコンパイルし実行ファイルを作るには、コンパイル/オプションを変更してやる必要がある。
+            // e.g. gcc -std=c11 -Wall chapter_9.2.c -o ../bin/main
+            if(1) {
+                const int foo = 100;
+// NG ただしコンパイルオプション次第です。                int* const pf = &foo;
+//                *pf = 101;
+                printf("foo is %d\n",foo);
+            }
+            if(2) {
+                int y = 42;
+                int z = 84;
+                const int* pg = &y;
+// NG                *pg = 420;
+                pg = &z;    // OK
+                printf("*pg value is %d\n",*pg);
+            }
+            if(3) {
+                int y = 42;
+                int z = 3;
+                printf("z value is %d\n",z);
+                int* const pg = &y;
+// NG                pg = &z;
+                *pg = 333;  // OK
+                printf("*pg value is %d\n",*pg);
+                
+            }
+            
         }
     }
     return 0;
