@@ -48,6 +48,7 @@ int main(void) {
                                     読み込む必要があり、struct tag名だろうと、typedef struct {} FOO; だろうと大差はないと思っている。 
             */
             
+            puts("ポインタと const 修飾の復習 ---");
             // ちょっとだけポインタに関して復習だ。
             // 次をコンパイルし実行ファイルを作るには、コンパイル/オプションを変更してやる必要がある。
             // e.g. gcc -std=c11 -Wall chapter_9.2.c -o ../bin/main
@@ -74,8 +75,43 @@ int main(void) {
                 *pg = 333;  // OK
                 printf("*pg value is %d\n",*pg);
                 
-            }
-            
+            }           
+        }
+        /**
+                            構造体は、配列と同じように初期化できる。
+        */
+        if("9-42") {
+            puts("9-42 構造体の初期化 ---");
+            struct PERSON {
+                const char* const name;
+                int age;
+            };
+            struct PERSON person = {"Jack",14};
+            printf("name is %s\tage is %d\n",person.name,person.age);
+        }
+         /**
+                            構造体の全部のフィールドに 0 を代入できる。
+        */
+        if("9-43") {
+            puts("9-43 構造体のフィールドに 0 を代入 ---");
+            struct pair {
+                int a;
+                int b;
+            };
+            struct pair p = {0};
+            printf("a is %d\tb is %d\n",p.a,p.b);
+        }
+         /**
+                            構造体の初期化 ... C99 で追加された、指定フィールドの初期化（指定フィールド以外は 0 で初期化される）。
+        */
+        if("9-44") {
+            puts("9-44 C99 で追加された、指定フィールドの初期化（指定フィールド以外は 0 で初期化される） ---");
+            struct pair {
+                char a;
+                char b;
+            };
+            struct pair p = {.a='A'};
+            printf("a is %c\tb is %d\n",p.a,p.b);
         }
     }
     return 0;
