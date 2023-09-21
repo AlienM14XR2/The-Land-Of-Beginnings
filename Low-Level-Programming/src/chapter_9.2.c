@@ -178,6 +178,43 @@ int main(void) {
             printf("as_sa.x is %d\tas_sa.y is %d\tas_sa.z is %d\n",t.as_sa.x,t.as_sa.y,t.as_sa.z);
             printf("as_sb.x is %d\tas_sb.y is %d\tas_sb.notz is %d\n",t.as_sb.x,t.as_sb.y,t.as_sb.notz);
         }
+        /**
+            C11 から、共用体と構造体は、他の構造体または共用体の内側にあるとき、名前（タグ）をつけないことが許されるようになった。
+                          これによって、内側のフィールドにアクセスする構文を短くすることができる。
+        */
+        puts("9.2.3 無名の構造体・共用体 ---------");
+        if("9-48") {
+            puts("9-48 ---");
+            // C11 より前の書き方
+            union vec3d {
+                struct {
+                    double x;
+                    double y;
+                    double z;
+                } named;    // named というタグが必要、またこの位置にないとコンパイル・エラーになった。
+            };
+            union vec3d vec = {.named={10.0,20.0,30.0}};
+            printf("x is %lf\ty is %lf\t z is %lf\n",vec.named.x,vec.named.y,vec.named.z);
+        }
+        if("9-49") {
+            puts("9-49 ---");
+            // C11 から許可された書き方、内側の struct のタグの記述がない。
+            union vec3d {
+                struct {
+                    double x;
+                    double y;
+                    double z;
+                };
+                double row[3];
+            };
+            union vec3d vec = {.x=10.0,.y=20.0,.z=30.0};
+            printf("x is %lf\ty is %lf\t z is %lf\n",vec.x,vec.y,vec.z);
+            size_t sz = sizeof(vec.row)/sizeof(vec.row[0]);
+            unsigned long i = 0;
+            for(i=0; i < sz; i++) {
+                printf("vec.row[%lu] is %lf\n",i,vec.row[i]);
+            }
+        }
 
    }
     return 0;
