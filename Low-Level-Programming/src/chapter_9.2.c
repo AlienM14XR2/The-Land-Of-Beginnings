@@ -215,6 +215,29 @@ int main(void) {
                 printf("vec.row[%lu] is %lf\n",i,vec.row[i]);
             }
         }
+        /**
+                            列挙（enumeration）は、int をベースとした単純なデータ型定義である。
+                            型がとり得る値を列挙して、それぞれに名前を付けるので、その働きは、個別に #define するのと似ている。
+                            たとえば交通信号が、次にあげる状態のどれかだとしよう（色はどのライトが点灯するかに基づく）。
+            - 赤
+            - 赤と黄色
+            - 黄色
+            - 緑
+            - 点灯なし
+        */
+        puts("9.2.4 列挙型 ---------");
+        if("9-50") {
+            puts("9-50 ---");
+            enum light {
+                RED,
+                RED_AND_YELLOW,
+                YELLOW,
+                GREEN,
+                NOTHNG,
+            };
+            enum light l = NOTHNG;
+            printf("l is %d\n",l);
+        } 
 
    }
     return 0;
