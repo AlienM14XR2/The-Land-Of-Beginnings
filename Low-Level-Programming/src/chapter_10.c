@@ -14,10 +14,13 @@
 */
 #include "stdio.h"
 
+int z = 10;
+
 /* これが関数の宣言、このような宣言は、ときに関数プロトタイプとも呼ばれる */
 int foo(int x);     // この仮引数は省略できたはず。
 int bar(int,int);   
-
+int square(int);    // @see square.c
+int square_v2(int);    // @see square.c
 
 int main(void) {
     // この章はサンプルをとることはあまりないかもしれないが、念の為用意した。
@@ -45,6 +48,37 @@ int main(void) {
             struct b {
                 struct a* other;    // struct a はすでに定義されているので、前方宣言は不要。
             };
+        }
+    }
+    if("10.2 他のファイルのコードをアクセスする") {
+        if("10.2.1 他のファイルの関数") {
+            /**
+                square.c を利用する。
+                @see square.c
+                ```
+                gcc -c -std=c11 -pedantic -Wall -Werror chapter_10.c
+                objdump -t chapter_10.o
+                
+                gcc -c -std=c11 -pedantic -Wall -Werror square.c
+                objdump -t square.o
+                
+                gcc -o ../bin/main chapter_10.o square.o
+                objdump -t ../bin/main
+                ```
+            */
+            puts("10.2.1 他のファイルの関数 =========");
+            printf("square(3) is %d\n",square(3));
+        }
+        if("10.2.2 他のファイルのデータ") {
+            /**
+                ```
+                gcc -c -std=c11 -pedantic -Wall -Werror chapter_10.c
+                gcc -c -std=c11 -pedantic -Wall -Werror square.c
+                gcc -o ../bin/main chapter_10.o square.o
+                ```
+            */
+            puts("10.2.2 他のファイルのデータ =========");
+            printf("square_v2(3) is %d\n",square_v2(3));
         }
     }
     return 0;
