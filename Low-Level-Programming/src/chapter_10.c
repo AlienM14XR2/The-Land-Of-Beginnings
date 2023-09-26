@@ -13,6 +13,7 @@
     @author jack
 */
 #include "stdio.h"
+#include "printer.h"
 
 // グローバル変数 z の宣言と初期化
 int z = 10;         // @see square.c
@@ -80,6 +81,18 @@ int main(void) {
             */
             puts("10.2.2 他のファイルのデータ =========");
             printf("square_v2(3) is %d\n",square_v2(3));
+        }
+        if("10.2.3 ヘッダファイル") {
+            /**
+                ```
+                gcc -c -std=c11 -pedantic -Wall -Werror chapter_10.c
+                gcc -c -std=c11 -pedantic -Wall -Werror square.c
+                gcc -c -std=c11 -pedantic -Wall -Werror printer.c
+                gcc -o ../bin/main chapter_10.o square.o printer.o
+                ```
+            */
+            print_one();    // @see printer.c
+            print_two();    // @see printer.c
         }
     }
     return 0;
