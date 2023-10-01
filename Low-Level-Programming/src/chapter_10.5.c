@@ -1,6 +1,10 @@
 /**
     10.5 例：動的配列の要素の和
     malloc と free
+    
+    ```
+    gcc -std=c11 -pedantic-errors -Wall -Werror chapter_10.5.c -o ../bin/main
+    ```
 */
 #include "stdio.h"
 #include "malloc.h"
@@ -20,6 +24,7 @@ struct node {
     struct node* pre;
     struct node* next;
 };
+int list_free(struct node* list, size_t size);
 /**
         整数を受け取る、連結リストの新しいノード（node）を作って、それへのポインタを返す。
 */
@@ -30,6 +35,13 @@ struct node* list_create(int val) {
     new_node->next = NULL;
     return new_node;
 }
+int test_list_create(int val) {
+    puts("--- test_list_create");
+    struct node* pnode = list_create(val);
+    printf("value is %d\tpre is %p\tnext is %p\n",pnode->value,(void*)pnode->pre,(void*)pnode->next);
+    list_free(pnode,1);
+    return 0;
+}
 /**
         整数と、連結リストへのポインタへのポインタを受け取る。
         受け取った数で作った新しいノードを、リストの先頭へ追加する。
@@ -37,6 +49,21 @@ struct node* list_create(int val) {
         
     list_add_front
 */
+int list_add_front(int val, struct node* front) {
+    struct node* new_node = list_create(val);
+    printf("value is %d\taddress is %p\n",new_node->value,(void*)new_node);
+    front->pre = new_node;
+    new_node->next = front;
+    return 0;
+}
+int test_list_add_front(int val,struct node* front) {
+    puts("--- test_list_add_front");
+    printf("value is %d\taddress is %p\n",front->value,(void*)front);
+    list_add_front(val,front);
+    puts("... after add");
+    printf("value is %d\tfront->pre is %p\tfront->next is %p\n",front->value,(void*)front->pre,(void*)front->next);
+    return 0;
+}
 /**
         要素をリストの末尾に追加する。
         シグネチャは list_add_front と同じ
@@ -54,6 +81,20 @@ struct node* list_create(int val) {
         
     list_free
 */
+int list_free(struct node* list, size_t size) {
+    if( list != NULL ) {
+        puts("--- list_free");
+        for(size_t i=0; i < size; i++) {
+            printf("value is %d\taddress is %p\n",list[i].value,(void*)&list[i]);
+        }
+        // これは間違ってる、正しくメモリ解放されない。
+        for(size_t i=0; i < size; i++) {
+            free(&list[i]);
+        }
+        printf("... DONE free.\n");
+    }
+    return 0;
+}
 /**
         リストを受取その長さを計算する。
         
@@ -70,12 +111,6 @@ struct node* list_create(int val) {
         
     list_sum
 */
-int test_list_create(int val) {
-    puts("--- test_list_create");
-    struct node* pnode = list_create(val);
-    printf("value is %d\tpre is %p\tnext is %p\n",pnode->value,(void*)pnode->pre,(void*)pnode->next);
-    return 0;
-}
 int main(void) {
     if("10.5.1") {
         puts("動的メモリ割り当て（紹介）---------");
@@ -97,6 +132,10 @@ int main(void) {
         puts("課題：連結リスト ---------");
         int n = 3;
         printf("Play and Result ... test_list_create(%d) is %d\n",n,test_list_create(n));
+        struct node* list = list_create(n);
+        int a = 6;
+        printf("Play and Result ... test_list_add_front(%d, list) is %d\n",a,test_list_add_front(a, list));
+ //       list_free(list,2);
     }
     return 0;
 }
