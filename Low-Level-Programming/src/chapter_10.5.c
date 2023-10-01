@@ -12,9 +12,33 @@ int init_array(int* array, size_t size) {
     }
     return 0;
 }
+/**
+    10.6 課題：連結リスト
+*/
+struct node {
+    int value;
+    struct node* pre;
+    struct node* next;
+};
+/**
+        整数を受け取る、連結リストの新しいノード（node）を作って、それへのポインタを返す。
+*/
+struct node* list_create(int val) {
+    struct node* new_node = malloc(1 * sizeof(struct node));
+    new_node->value = val;
+    new_node->pre = NULL;
+    new_node->next = NULL;
+    return new_node;
+}
+int test_list_create(int val) {
+    puts("--- test_list_create");
+    struct node* pnode = list_create(val);
+    printf("value is %d\tpre is %p\tnext is %p\n",pnode->value,(void*)pnode->pre,(void*)pnode->next);
+    return 0;
+}
 int main(void) {
     if("10.5.1") {
-        puts("動的メモリ割り当て（紹介）");
+        puts("動的メモリ割り当て（紹介）---------");
         int* array;
         size_t size = 10;
         // malloc は割り当てたメモリの開始アドレスを返す。
@@ -28,6 +52,11 @@ int main(void) {
         }
         // ここでメモリ領域の割り当てを解放する。
         free(array);
+    }
+    if("10.6.1 課題") {
+        puts("課題：連結リスト ---------");
+        int n = 3;
+        printf("Play and Result ... test_list_create(%d) is %d\n",n,test_list_create(n));
     }
     return 0;
 }
