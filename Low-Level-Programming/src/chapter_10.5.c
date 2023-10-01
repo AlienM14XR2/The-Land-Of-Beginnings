@@ -30,6 +30,46 @@ struct node* list_create(int val) {
     new_node->next = NULL;
     return new_node;
 }
+/**
+        整数と、連結リストへのポインタへのポインタを受け取る。
+        受け取った数で作った新しいノードを、リストの先頭へ追加する。
+        例えば、前のリストが (1,2,3) で、数が 5 なら、新しいリストは (5,1,2,3)になる。
+        
+    list_add_front
+*/
+/**
+        要素をリストの末尾に追加する。
+        シグネチャは list_add_front と同じ
+        
+    list_add_back
+*/
+/**
+        指定されたインデックスの要素を返す。もしインデックスが
+        リストの境界外なら 0 を返す。
+        
+    list_get
+*/
+/**
+        リストの全要素に割り当てられているメモリを解放する。
+        
+    list_free
+*/
+/**
+        リストを受取その長さを計算する。
+        
+    list_length
+*/
+/**
+        リストとインデックスを受け取り、そのインデックスに相当する
+        ノードのリスト構造体へのポインタを返す。もしインデックスが大きすぎたら、NULL を返す。
+        
+    list_node_at
+*/
+/**
+        リストを受け取り、要素の合計を返す。
+        
+    list_sum
+*/
 int test_list_create(int val) {
     puts("--- test_list_create");
     struct node* pnode = list_create(val);
