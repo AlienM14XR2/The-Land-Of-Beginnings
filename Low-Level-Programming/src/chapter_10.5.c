@@ -115,7 +115,6 @@ int list_get(const size_t index, struct node* list) {
         for(size_t i=0; i < index; i++){
             current = current->next;
         }
-        printf("DEBUG: value is %d\taddress is %p\n",current->value,(void*)current);
         result = current->value;
     }
     return result;
@@ -161,7 +160,7 @@ int list_free(struct node* top) {
 /**
         リストを受取その長さを計算する。
         
-    list_length
+    list_length ... @see list_node_count
 */
 /**
         リストとインデックスを受け取り、そのインデックスに相当する
@@ -169,6 +168,28 @@ int list_free(struct node* top) {
         
     list_node_at
 */
+struct node* list_node_at(const size_t index, const struct node* const list) {
+    struct node* result = NULL;
+    size_t count = list_node_count(list);
+    if(index < count) {
+        struct node* current = list_node_first(list);
+        for(size_t i=0; i < index; i++){
+            current = current->next;
+        }
+        result = current;
+    }
+    return result;
+}
+int test_list_node_at(const size_t index, const struct node* const list) {
+    puts("--- test_list_node_at");
+    struct node* test = list_node_at(index,list);
+    if(test != NULL) {
+        printf("DEBUG: value is %d\taddress is %p\n",test->value,(void*)test);
+    } else {
+        puts("test is NULL.");
+    }
+    return 0;
+}
 /**
         リストを受け取り、要素の合計を返す。
         
@@ -279,6 +300,19 @@ int main(void) {
         printf("Play and Result ... test_list_get(%lu,list) is %d\n",index,test_list_get(index,list));
         index = 4;
         printf("Play and Result ... test_list_get(%lu,list) is %d\n",index,test_list_get(index,list));
+        
+        index = 0;
+        printf("Play and Result ... test_list_node_at(%lu,list) is %d\n",index,test_list_node_at(index,list));
+        index = 1;
+        printf("Play and Result ... test_list_node_at(%lu,list) is %d\n",index,test_list_node_at(index,list));
+        index = 2;
+        printf("Play and Result ... test_list_node_at(%lu,list) is %d\n",index,test_list_node_at(index,list));
+        index = 3;
+        printf("Play and Result ... test_list_node_at(%lu,list) is %d\n",index,test_list_node_at(index,list));
+        index = 4;
+        printf("Play and Result ... test_list_node_at(%lu,list) is %d\n",index,test_list_node_at(index,list));
+        
+        
         list_free(current);
     }
     puts("=== END 10.5");
