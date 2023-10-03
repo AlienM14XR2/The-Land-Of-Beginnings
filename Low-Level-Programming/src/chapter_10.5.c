@@ -195,7 +195,24 @@ int test_list_node_at(const size_t index, const struct node* const list) {
         
     list_sum
 */
-
+int list_sum(const struct node* const list) {
+    int sum = 0;
+    struct node* current = list_node_first(list);
+    while(1) {
+        if(current->next != NULL) {
+            sum += current->value;
+            current = current->next;
+        } else {
+            sum += current->value;
+            break;
+        }
+    }
+    return sum;
+}
+int test_list_sum(const struct node* const list) {
+    puts("--- test_list_sum");
+    return list_sum(list);
+}
 //
 // ここからは、課題で具体的には示されていない関数、個人的に必要だと思ったもの。
 // 考え方はシンプルに DRY の原則だ。
@@ -312,6 +329,7 @@ int main(void) {
         index = 4;
         printf("Play and Result ... test_list_node_at(%lu,list) is %d\n",index,test_list_node_at(index,list));
         
+        printf("Play and Result ... test_list_sum(list) is %d\n",test_list_sum(list));
         
         list_free(current);
     }
