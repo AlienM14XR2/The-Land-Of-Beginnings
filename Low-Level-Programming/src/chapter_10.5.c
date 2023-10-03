@@ -29,6 +29,7 @@ struct node {
 int list_free(struct node* top);
 struct node* list_node_first(const struct node* const current);
 struct node* list_node_last(const struct node* const current);
+size_t list_node_count(const struct node* const pnode);
 
 /**
         整数を受け取る、連結リストの新しいノード（node）を作って、それへのポインタを返す。
@@ -103,10 +104,27 @@ struct node* test_list_add_back(int val, struct node* pnode) {
         
     list_get
 */
-struct node* list_get(const size_t n, struct node* list) {
-    struct node* result = 0;
+int list_get(const size_t index, struct node* list) {
+    int result = 0;
     // 最初に現在のノード数がいくつあるのか知る必要がある。
+    size_t count = list_node_count(list);
+    printf("DEBUG: index is %lu\n",index);
+    printf("DEBUG: count is %lu\n",count);
+    if(index < count) {
+        struct node* current = list_node_first(list);
+        for(size_t i=0; i < index; i++){
+            current = current->next;
+        }
+        printf("DEBUG: value is %d\taddress is %p\n",current->value,(void*)current);
+        result = current->value;
+    }
     return result;
+}
+int test_list_get(const size_t n, struct node* list) {
+    puts("--- test_list_get");
+    int val = list_get(n,list);
+    printf("value is %d\n",val);
+    return 0;
 }
 /**
         リストの全要素に割り当てられているメモリを解放する。
@@ -117,14 +135,6 @@ int list_free(struct node* top) {
     if( top != NULL ) {
         puts("--- list_free");
         // ポインタをリストの終端へ移動する。
-//        struct node* current = top;
-//        while(1) {
-//            if(current->next != NULL) {
-//                current = current->next;
-//            } else {
-//                break;
-//            }
-//        }
         const struct node* current = list_node_last(top);
         printf("value is %d\taddress is %p\n",current->value,(void*)current);
         // メモリ解放を行う。
@@ -205,6 +215,27 @@ struct node* list_node_first(const struct node* const current) {
     }
     return (struct node*)first;
 }
+/**
+        第一仮引数にノードのポインタを受け取り
+        現在のノード数を返す。
+*/
+size_t list_node_count(const struct node* const pnode) {
+    size_t count = 0;
+    if(pnode != NULL) {
+        // 一度先頭のノードまでポインタを移動させる
+        struct node* first = list_node_first(pnode);
+        while(1) {
+            if(first->next != NULL) {
+                count++;
+                first = first->next;
+            } else {
+                count++;
+                break;
+            }
+        }
+    }
+    return count;
+}
 
 int main(void) {
     if("10.5.1") {
@@ -238,6 +269,16 @@ int main(void) {
         current = test_list_add_front(c, list);
         printf("Play and Result ... test_list_add_front(%d,list) current is %p\n",c,(void*)current);
         
+        size_t index = 0;
+        printf("Play and Result ... test_list_get(%lu,list) is %d\n",index,test_list_get(index,list));
+        index = 1;
+        printf("Play and Result ... test_list_get(%lu,list) is %d\n",index,test_list_get(index,list));
+        index = 2;
+        printf("Play and Result ... test_list_get(%lu,list) is %d\n",index,test_list_get(index,list));
+        index = 3;
+        printf("Play and Result ... test_list_get(%lu,list) is %d\n",index,test_list_get(index,list));
+        index = 4;
+        printf("Play and Result ... test_list_get(%lu,list) is %d\n",index,test_list_get(index,list));
         list_free(current);
     }
     puts("=== END 10.5");
