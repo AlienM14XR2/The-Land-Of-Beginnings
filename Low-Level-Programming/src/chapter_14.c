@@ -8,6 +8,7 @@
 */
 
 #include "stdarg.h"
+#include "setjmp.h"
 #include "stdio.h"
 
 void printer(unsigned long argcount, ... ) {
@@ -73,6 +74,53 @@ int main(void) {
             printf("vol is %d\n",vol);
         }
         
+    }
+    if("14.3") {
+        /**
+                            非局所的なジャンプと setjmp
+                            その例外
+             - 外の世界に関係するもの（たとえばオープンしたファイルのディスクリプタ）
+             - 浮動小数点のコンテクスト（状態フラグ）
+             - ローカル変数の値
+             
+                             先コンテクストを保存しておき、後で戻りたくなったとき、そこに跳躍して戻ることが可能になる（ジャンプは同じスコープの関数に限定されない）。
+             setjmp.h をインクルードすると、下記の機構を利用できる。
+             - jmp_buf は、コンテクストを保存できる変数の型である。
+             - int setjmp(jmp_buf env) は、jmp_buf のインスタンスを受け取り、その中に現在のコンテクストを保存する関数だ。デフォルトでは 0 を返す。
+             - void longjmp(jmp_buf env, int val) は、jmp_buf 型の変数に保存されたコンテクストに戻るために使う。
+             
+             longjmp から本当に戻るときに setjmp が返すのは 0 とは限らず、longjmp に与えられた引数 val の値が返される。
+             
+            volatile と setjmp
+            
+                            正しくコーディングするために、次のことを覚えておこう。longjmp の後は、volatile ローカル変数だけが、定義した値を格納している。
+                            元の値が書き戻されるわけではない、jmp_buf はスタックの変数を保存せず、longjmp までスタックに残っていた値が、そのまま使われるのだ。
+                            
+            ```
+            gcc -O0 最適化なし
+            gcc -O2 最適化あり
+                                     
+            gcc -O0 -std=c11 -pedantic-errors -Wall -Werror chapter_14.c -o ../bin/main
+            gcc -O2 -std=c11 -pedantic-errors -Wall -Werror chapter_14.c -o ../bin/main
+            ```
+                            以下のサンプルは、コンパイルの最適化あり・なしによって結果がことなる ... はず。
+            
+        */
+        if("14-15") {
+            puts("--- 非局所的なジャンプと setjmp、volatile と setjmp");
+            jmp_buf buf;
+            if(1) {
+                int var = 0;
+                volatile int b = 0;
+                setjmp(buf);
+                if(b < 3) {
+                    b++;
+                    var++;
+                    printf("var is %d\tb is %d\n",var,b);
+                    longjmp(buf,1);
+                }
+            }
+        }
     }
     return 0;
 }
