@@ -11,6 +11,10 @@
 #include "setjmp.h"
 #include "stdio.h"
 
+#include "inc.h"
+
+extern inline int inc(int x);   // @see inc.h
+
 void printer(unsigned long argcount, ... ) {
     va_list args;
     unsigned long i;
@@ -121,6 +125,22 @@ int main(void) {
                 }
             }
         }
+    }
+    if("14.4") {
+        /**
+            static を用いて C99 以前は関数のインライン化を行っていた。
+                            具体的には、ヘッダファイルの宣言ではなく、関数の完全な定義を入れる際に、static 修飾を行う。
+                            そのヘッダファイルを複数の変換単位にインクルードする。それぞれ生成されたコードのコピーを受け取るが、
+                            対応するシンボルが「オブジェクトローカル」なので、リンカはそれらを衝突する複数定義とみなさない。
+                            これなら、本当に関数をインライン化できる。
+                            
+                            コンパイラが、関数をインライン化しないと ... メモリ上のイメージだけでなく実行ファイルも膨張する。
+             inline キーワードは、この問題に対処するためにある。
+             
+             @see inc.h
+        */
+        puts("--- inline 関数");
+        printf("inc(8) is %d\n",inc(8));       
     }
     return 0;
 }
