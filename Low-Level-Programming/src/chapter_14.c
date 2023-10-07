@@ -140,7 +140,41 @@ int main(void) {
              @see inc.h
         */
         puts("--- inline 関数");
-        printf("inc(8) is %d\n",inc(8));       
+        printf("inc(8) is %d\n",inc(8));
+    }
+    if("14.5") {
+        /**
+            restrict は volatile や const と同じカテゴリのキーワードで、C99 標準で最初に現れた。
+                            これはポインタに付けるマークだから、アスタリスクの右側に置かれる、例えば次のように。
+                            
+                            オブジェクトを指す restrict ポインタを作ったら、それは「このオブジェクトに対する全部のアクセスは、この
+                            ポインタの値を通じて行いますよ」という約束になる。
+        */
+        puts("--- restrict ポインタ");
+        int x = 3;
+        int* restrict px = &x;
+        printf("*px is %d\tpoint is %p\n",*px,(void*)px);
+        printf("x is %d\taddress is %p\n",x,(void*)&x);
+        if("14-22") {
+            /**
+                                    次のような restrict ポインタから、もうひとつの restrict ポインタへとコピーする、ポインタの
+                                    階層構造を作ることは可能である。けれども標準は、コピー元のブロックに入らないケースに限定している。
+            */
+            struct s {
+                int* x;
+            };
+            
+            int n = 3;
+            struct s ss = {.x=&n};
+            
+            struct s* restrict ps = &ss;
+            int* restrict px = ps->x;       // NG ... にならなかった：）
+            printf("px ... %d\n",*px);
+            {
+                int* restrict px2 = ps->x;
+                printf("px2 is ... %d\n",*px2);
+            }
+        }
     }
     return 0;
 }
