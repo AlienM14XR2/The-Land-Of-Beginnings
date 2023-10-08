@@ -13,7 +13,18 @@
 
 #include "inc.h"
 
+struct a {
+    int val;
+};
+struct b {
+    int val;
+};
 extern inline int inc(int x);   // @see inc.h
+
+void func_14_23(struct a* pa, struct b* pb) {
+    pa->val += pb->val;
+    pa->val += pb->val;
+}
 
 void printer(unsigned long argcount, ... ) {
     va_list args;
@@ -176,5 +187,17 @@ int main(void) {
             }
         }
     }
-    return 0;
+     if("14.6") {
+        puts("--- 厳密な別名のルール");
+        
+        struct a sa = {.val=3};
+        struct b sb = {.val=6};
+        struct a* pa = &sa;
+        struct b* pb = &sb;
+        printf("before ... func_14_23 sa.val is %d\tsb.val is %d\n",sa.val,sb.val);
+        func_14_23(pa, pb);
+        printf("after ... func_14_23 sa.val is %d\tsb.val is %d\n",sa.val,sb.val);
+        
+     }
+   return 0;
 }
