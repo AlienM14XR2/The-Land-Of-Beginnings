@@ -187,7 +187,7 @@ int main(void) {
             }
         }
     }
-     if("14.6") {
+    if("14.6") {
         puts("--- 厳密な別名のルール");
         
         struct a sa = {.val=3};
@@ -198,6 +198,9 @@ int main(void) {
         func_14_23(pa, pb);
         printf("after ... func_14_23 sa.val is %d\tsb.val is %d\n",sa.val,sb.val);
         
-     }
-   return 0;
+    }
+    if("14.7") {
+        puts("--- セキュリティの問題");
+    }
+    return 0;
 }
