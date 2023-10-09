@@ -26,6 +26,23 @@ int main(void) {
         GOT（Global Offset Table） と PLT（Program Linkage Table） について学ぶ前に
         C で最小のライブラリを作っておく。
         @see mainlib.c dynlib.c
+        
+        ```
+        // メインのオブジェクトファイルを作る。
+        gcc -std=c11 -c mainlib.c -o ../bin/mainlib.o
+        
+        // ライブラリのオブジェクトファイルを作る。
+        gcc -std=c11 -c -fPIC dynlib.c -o ../bin/dynlib.o
+        
+        // 動的ライブラリを作成する。
+        gcc -std=c11 -o ../bin/dynlib.so -shared ../bin/dynlib.o
+        
+        // 実行ファイルを作って、動的ライブラリとリンクする。
+        gcc -std=c11 -o ../bin/main ../bin/mainlib.o ../bin/dynlib.so
+        
+        // 実行ファイルの依存関係を調べる
+        ldd main
+        ```
     */
     return 0;
 }
