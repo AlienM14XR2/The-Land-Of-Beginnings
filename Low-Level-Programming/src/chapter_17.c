@@ -17,6 +17,14 @@ void* thread_impl(void* arg) {
     return NULL;
 }
 
+void* worker(void* param) {
+    for(int i=0 ; i < 3; i++) {
+        puts((const char*)param);
+        sleep(1);
+    }
+    return (void*)"done.";
+}
+
 int main(void) {
     puts("=== 第１７章    マルチスレッド");
     if("17.7") {
@@ -25,7 +33,7 @@ int main(void) {
     if("17.8") {
         puts("--- pthreads の紹介");
     }
-    if("17.8.2") {
+    if(0) {
         puts("--- 17.8.2 スレッド作成");
         pthread_t t1, t2;
         /**
@@ -49,6 +57,21 @@ int main(void) {
         int foo = 3;
         (void)foo;  // unused variable の警告あるいはエラーがなくなる：）
         puts("bye");
+    }
+    if("17.8.3") {
+        /**
+                           もっとも単純な同期は、スレッドの合流（joining）である。
+            pthread_t のインスタンスについて pthread_join を呼び出すと、現在のスレッドは、その別
+                           スレッドが終了するまで待ち状態に入る。
+            thread_join は２つの引数を受け取る、スレッドそのものと、そのスレッドの実行結果によって後に初期化される
+            void* 型変数のポインタだ。
+        */
+        puts("--- 17.8.2 スレッド管理");
+        pthread_t t;
+        void* result;
+        pthread_create(&t, NULL, worker, (void*)"I am worker.");
+        pthread_join(t, &result);
+        puts((const char*)result);
     }
     return 0;
 }
