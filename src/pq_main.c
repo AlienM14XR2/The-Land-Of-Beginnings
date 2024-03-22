@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include "libpq-fe.h"
 
 /**
@@ -44,12 +45,20 @@
 */
 
 void debug_int(const char* message, const int* debug) {
-  printf("DEBUG: %s\t%d\taddr is %p\n",message, *debug, (void*)debug);
+  printf("DEBUG: %s\t%d\taddr is %p\n", message, *debug, (void*)debug);
 }
 
-void debug_fp(const char* message, const double* debug) // 浮動小数点 の直訳は floating point.
+void debug_long(const char* message, const long* debug) {
+  printf("DEBUG: %s\t%ld\taddr is %p\n", message, *debug, (void*)debug);
+}
+
+void debug_double(const char* message, const double* debug) // 浮動小数点 の直訳は floating point.
 {
-  printf("DEBUG: %s\t%lf\taddr is %p\n",message, *debug, (void*)debug);
+  printf("DEBUG: %s\t%lf\taddr is %p\n", message, *debug, (void*)debug);
+}
+
+void debug_string(const char* message, const char* debug) {
+  printf("DEBUG: %s\t%s\taddr is %p\n", message, debug, debug);
 }
 
 /**
@@ -89,11 +98,122 @@ void printData(const struct Data* d) {
   printf("col: %s\ttype: %s\tval: %s\tconstraint: %s\n", d->col, d->type, d->val, d->constraint);
 }
 
+long dataTol(const struct Data* d) {
+  if(strcmp(d->type, "long") == 0) {
+    return atol(d->val);
+  } else {
+    printf("Error: in dataTol()\n");
+    exit(1);
+  }
+}
+
+int dataToi(const struct Data* d) {
+  if(strcmp(d->type, "int") == 0) {
+    return atoi(d->val);
+  } else {
+    printf("Error: in dataToi()\n");
+    exit(1);
+  }
+}
+
+double dataTof(const struct Data* d) {
+  if(strcmp(d->type, "double") == 0) {
+    return atof(d->val);
+  } else {
+    printf("Error: in dataTof()\n");
+    exit(1);
+  }
+}
+
 int test_Data() {
   puts("====== test_Data");
-  struct Data d = {"id", "long", "1", "PRIMARY KEY"};
+  struct Data d = {"id", "long", "1", "BIGINT PRIMARY KEY"};
+  printData(&d);
   // TODO atoi() atol() atof() で val を数値型に変換してみる、変換対象は type で判断できるはず。
-  printData(&d);  
+  if(strcmp(d.type, "long") == 0) {
+    long val = atol(d.val);
+    debug_long("val is ", &val);
+  }
+  long d_val = dataTol(&d);
+  debug_long("d_val is ", &d_val);
+  struct Data d2 = {"email", "string", "foo@loki.org", "VARCHAR(256) NOT NULL UNIQUE"};
+  printData(&d2);
+  if(strcmp(d2.type, "string") == 0) {
+    debug_string("val is ", d2.val);    
+  }
+  struct Data d3 = {"age", "int", "24", "INTEGER"};
+  printData(&d3);
+  if(strcmp(d3.type, "int") == 0) {
+    int val = atoi(d3.val);
+    debug_int("val is ", &val);
+  }
+  int d3_val = dataToi(&d3);
+  debug_int("d3_val is ", &d3_val);
+  struct Data d4 = {"tax", "double", "1.53", "NUMERIC"};
+  double d4_val = dataTof(&d4);  
+  debug_double("d4_val is ", &d4_val);
+  /**
+        確かにこの方法なら型の管理はできるが、atoi() atol() atof() をラップした dataToi() dataTol() dataTof() が必要になる。 
+    C 言語は強い型付言語ではないが、それでも型に束縛されていく。さらに型にはそれぞれ unsigned もある orz この点は PostgreSQL 
+        に存在する型に合わせていく必要があると思われる。
+  */
+  return 0;
+}
+
+/**
+  Template Method パターン を考えてみる。
+  
+    関数ポインタでできないかな。
+    これは以前から試してみたかったこと。
+*/
+
+void add(const int* lhs, const int* rhs, int* result) {
+  *result = (*lhs) + (*rhs);
+}
+
+void multi(const int* lhs, const int* rhs, int* result) {
+  *result = (*lhs) * (*rhs);
+}
+
+void (*calc)(const int* lhs, const int* rhs, int* result);
+
+int test_calc_1() {
+  puts("====== test_calc_1");
+  calc = add;
+  int lhs = 3;
+  int rhs = 6;
+  int ret = 0;
+  calc(&lhs, &rhs, &ret);
+  debug_int("ret is ", &ret);
+  
+  lhs = 3;rhs = 6;ret = 0;
+  calc = multi;
+  calc(&lhs, &rhs, &ret);
+  debug_int("ret is ", &ret);  
+  return 0;
+}
+
+int test_calc_2(void (*func)(const int*, const int*, int*)) {
+  puts("====== test_calc_2");
+  int lhs = 3;
+  int rhs = 6;
+  int ret = 0;
+  func(&lhs, &rhs, &ret);
+  debug_int("ret is ", &ret);  
+  return 0;
+}
+
+void template_method_a(
+    void (*func_1)(const int*, const int*, int*)
+  , void (*func_2)(const int*, const int*, int*)
+);
+
+int test_template_method_a() {
+  puts("====== test_template_method_a");
+  template_method_a(add, multi);
+  /**
+        関数ポインタの型さえあっていれば、Template Method パターンの実現は可能ということ。
+  */
   return 0;
 }
 
@@ -102,7 +222,7 @@ int main(void) {
   if(0.01) {
     const double pi = 3.141592;
     printf("pi is %lf\n", pi);
-    debug_fp("pi is", &pi);
+    debug_double("pi is", &pi);
     int x = (int)pi;
     debug_int("x is", &x);
     assert(x == 3);
@@ -112,7 +232,34 @@ int main(void) {
     ret = test_Data();
     debug_int("Play and Result ... ", &ret);
     assert(ret == 0);
+    ret = test_calc_1();
+    debug_int("Play and Result ... ", &ret);
+    assert(ret == 0);
+    ret = test_calc_2(add);
+    debug_int("Play and Result ... ", &ret);
+    assert(ret == 0);
+    ret = test_calc_2(multi);
+    debug_int("Play and Result ... ", &ret);
+    assert(ret == 0);
+    ret = test_template_method_a();
+    debug_int("Play and Result ... ", &ret);
+    assert(ret == 0);
   }
   puts("=== 課題  PostgreSQL と C 言語  END");
   return 0;
 }
+
+void template_method_a(
+    void (*func_1)(const int*, const int*, int*)
+  , void (*func_2)(const int*, const int*, int*)
+) {
+  puts("--------- template_method_a");
+  int lhs = 3;
+  int rhs = 6;
+  int ret = 0;
+  func_1(&lhs, &rhs, &ret);
+  debug_int("ret is ", &ret);
+  func_2(&lhs, &rhs, &ret);
+  debug_int("ret is ", &ret);  
+}
+
