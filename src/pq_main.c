@@ -169,7 +169,6 @@ const char* createTableSql(const char* tableName, const struct Data list[], cons
   return sql;
 }
 
-
 /**
 e.g.
 R"(
@@ -180,6 +179,22 @@ R"(
  )
 )";
 */
+
+
+
+
+static void
+exit_nicely(PGconn *conn)
+{
+        PQfinish(conn);
+        exit(1);
+}
+
+
+
+
+
+
 
 int test_createTableSql() {
   puts("====== test_createTableSql");
@@ -196,6 +211,25 @@ int test_createTableSql() {
     const char* sql = createTableSql("company", list, s);
     debug_string("sql is ", sql);
     free((void*)sql);
+  return 0;
+}
+
+int test_libpq_connect() {
+  // @see https://www.postgresql.jp/document/15/html/libpq-connect.html
+  // @see https://www.postgresql.jp/document/8.0/html/libpq-example.html
+  puts("====== test_libpq_connect");
+  const char *conninfo = "host=localhost port=5432 dbname=jabberwocky user=derek password=derek1234 connect_timeout=10";
+  PGconn     *conn;
+  conn = PQconnectdb(conninfo);
+  if(PQstatus(conn) != CONNECTION_OK)
+  {
+    fprintf(stderr, "Connection to database failed: %s",
+    PQerrorMessage(conn));
+    exit_nicely(conn);
+  } else {
+    printf("... DONE connected.\n");
+  }
+  PQfinish(conn);
   return 0;
 }
 
@@ -325,8 +359,10 @@ int main(void) {
     int ret = 0;
     ret = test_createTableSql();
     debug_int("Play and Result ... ", &ret);
+    assert(ret == 0);    
+    ret = test_libpq_connect();
+    debug_int("Play and Result ... ", &ret);
     assert(ret == 0);
-    
   }
   puts("=== 課題  PostgreSQL と C 言語  END");
   return 0;
