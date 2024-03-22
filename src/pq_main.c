@@ -87,10 +87,10 @@ void debug_string(const char* message, const char* debug) {
 
 
 struct Data {
-  const char* col;
-  const char* type;
-  const char* val;
-  const char* constraint;
+  const char* col;          // カラム名
+  const char* type;         // C における型(int, long, double)
+  const char* val;          // 値
+  const char* constraint;   // PosgreSQL における型とその制約
 };
 
 
@@ -125,9 +125,83 @@ double dataTof(const struct Data* d) {
   }
 }
 
+/**
+  SQL CREATE TABLE 文の作成。
+    内部で動的にメモリを確保している、利用後は解放すること（これを書いていて何か虚しい：）。
+*/
+const char* createTableSql(const char* tableName, const struct Data list[], const size_t size) {
+  puts("--------- createTableSql");
+  // メモリのサイズ計算
+  size_t total = 0;
+  size_t tbl_name_size  = strlen(tableName);
+  total = tbl_name_size;
+  for(size_t i=0; i<size; i++) {
+      printData(&list[i]);
+      size_t col_size   = strlen(list[i].col);
+      total += col_size;
+      size_t const_size = strlen(list[i].constraint);
+      total += const_size;
+      printf("col_size is %ld\tconst_size is %ld\n", col_size, const_size);
+  }
+  total*=2;
+  printf("total*2 is %ld\n", total);
+  char* sql = (char*)malloc(total);
+  sql[0] = '\0';
+  // SQL 文の作成
+  char step_1[] = "CREATE TABLE ";
+  strcat(sql, step_1);
+  strcat(sql, tableName);         // 元は一時変数、文字列リテラルだけど、関数内で利用するのは問題ないのかな。
+  char step_2[] = "(";
+  char space[] = " ";
+  char comma[] = ",";
+  char step_3[] = ")";
+  strcat(sql, step_2);
+  for(size_t i=0; i<size; i++) {
+    strcat(sql, list[i].col);
+    strcat(sql, space);
+    strcat(sql, list[i].constraint);
+    if(i+1 < size) {
+      strcat(sql, comma);      
+    }
+  }
+  strcat(sql, step_3);
+//  free(sql);
+  return sql;
+}
+
+
+/**
+e.g.
+R"(
+  CREATE TABLE company ( 
+    id      BIGINT       NOT NULL PRIMARY KEY
+  , name    VARCHAR(128) NOT NULL
+  , address VARCHAR(256) NOT NULL 
+ )
+)";
+*/
+
+int test_createTableSql() {
+  puts("====== test_createTableSql");
+  // どっちでもいいや：）
+//  size_t s = atol("9223372036854775807");
+//  long s   = atol("9223372036854775807");
+//  printf("s is %ld\n", s);
+    struct Data list[] = {{"id",      "long",   "0", "BIGINT PRIMARY KEY"}
+                         ,{"name",    "string",  "", "VARCHAR(128) NOT NULL"}
+                         ,{"address", "string",  "", "VARCHAR(256) NOT NULL"}};
+    size_t s = sizeof(list)/sizeof(list[0]);
+    assert(s == 3);
+    printf("s is %ld\n", s);
+    const char* sql = createTableSql("company", list, s);
+    debug_string("sql is ", sql);
+    free((void*)sql);
+  return 0;
+}
+
 int test_Data() {
   puts("====== test_Data");
-  struct Data d = {"id", "long", "1", "BIGINT PRIMARY KEY"};
+  struct Data d = {"id", "long", "1", "BIGINT PRIMARY KEY"};    // BIGINT は size_t が妥当ではないのか？  まぁいいや。
   printData(&d);
   // TODO atoi() atol() atof() で val を数値型に変換してみる、変換対象は type で判断できるはず。
   if(strcmp(d.type, "long") == 0) {
@@ -156,6 +230,8 @@ int test_Data() {
         確かにこの方法なら型の管理はできるが、atoi() atol() atof() をラップした dataToi() dataTol() dataTof() が必要になる。 
     C 言語は強い型付言語ではないが、それでも型に束縛されていく。さらに型にはそれぞれ unsigned もある orz この点は PostgreSQL 
         に存在する型に合わせていく必要があると思われる。
+        次のことはいずれ問題になるかもしれない、RDBMS への I/O は struct Data で本当に賄えるのか。入力は共通化できても出力は個々
+        の型が必要になるのではないかという疑念がある。
   */
   return 0;
 }
@@ -244,6 +320,13 @@ int main(void) {
     ret = test_template_method_a();
     debug_int("Play and Result ... ", &ret);
     assert(ret == 0);
+  }
+  if(1.01) {
+    int ret = 0;
+    ret = test_createTableSql();
+    debug_int("Play and Result ... ", &ret);
+    assert(ret == 0);
+    
   }
   puts("=== 課題  PostgreSQL と C 言語  END");
   return 0;
