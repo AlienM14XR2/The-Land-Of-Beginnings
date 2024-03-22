@@ -6,6 +6,28 @@
     興味散漫で申し訳ないが、これはこれでいつかやってみたい。
   C++ で pqxx を利用してクエリ発行（INSERT 文）した際に xdevapi より遅かったことが興味の発端だ。
     つまり、C ならもっと速いんじゃなかろうかという疑問。
+
+  # 日付型に関して
+  
+  ## MySQL
+  MySQL 日付には DateTime を使う（Timestamp は範囲が狭い、MySQL 5 系の話）
+  Datetime はタイムゾーンなし、Timestamp はあり、よってグローバルサービスは Timestamp を利用すべきとも言える。
+
+  次のようにすれば、明示的に 日付型を登録する必要がない。
+  ```
+  CREATE TABLE t1 (
+    ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    dt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  );
+  ```
+
+  ## postgres C言語 接続
+  ### Postgresql Create Table 日付型 自動登録
+  Postgres はトリガを利用する必要がある。
+
+  https://qiita.com/ruemura3/items/7bdca11243c8f1b49ae2
+  https://www.postgresql.jp/document/8.2/html/libpq-example.html
+
   
   e.g. compile
   gcc -O3 -DDEBUG -std=c17 -pedantic-errors -Wall -Werror -I/usr/include/postgresql/ -L/usr/lib/x86_64-linux-gnu/ pq_main.c -lpq -o ../bin/main
