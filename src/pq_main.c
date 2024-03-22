@@ -21,7 +21,7 @@
  assertion 等も忘れた：）... C++： #include <cassert> C： #include <assert.h> だと思う。
 */
 
-void debug_number(const char* message, const int* debug) {
+void debug_int(const char* message, const int* debug) {
   printf("DEBUG: %s\t%d\taddr is %p\n",message, *debug, (void*)debug);
 }
 
@@ -49,8 +49,31 @@ void debug_fp(const char* message, const double* debug) // 浮動小数点 の�
   
   ひとまず、ベタ書きで CRUD の一部だけ実装してみるか、設計を先に試すのかは考えて
   おこう。C 言語は自由で難しい。
+  
+  モジュールを .c ファイル、インタフェースを .h と捉えてみる。
+  前方宣言を任意の型（テンプレート）、定義を実体と考えてみる。
 */
 
+
+struct Data {
+  const char* col;
+  const char* type;
+  const char* val;
+  const char* constraint;
+};
+
+
+void printData(const struct Data* d) {
+  printf("col: %s\ttype: %s\tval: %s\tconstraint: %s\n", d->col, d->type, d->val, d->constraint);
+}
+
+int test_Data() {
+  puts("====== test_Data");
+  struct Data d = {"id", "long", "1", "PRIMARY KEY"};
+  // TODO atoi() atol() atof() で val を数値型に変換してみる、変換対象は type で判断できるはず。
+  printData(&d);  
+  return 0;
+}
 
 int main(void) {
   puts("START 課題  PostgreSQL と C 言語 ===");
@@ -59,8 +82,14 @@ int main(void) {
     printf("pi is %lf\n", pi);
     debug_fp("pi is", &pi);
     int x = (int)pi;
-    debug_number("x is", &x);
+    debug_int("x is", &x);
     assert(x == 3);
+  }
+  if(1.00) {
+    int ret = 0;
+    ret = test_Data();
+    debug_int("Play and Result ... ", &ret);
+    assert(ret == 0);
   }
   puts("=== 課題  PostgreSQL と C 言語  END");
   return 0;
