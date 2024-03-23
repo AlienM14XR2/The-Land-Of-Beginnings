@@ -126,7 +126,19 @@ double dataTof(const struct Data* d) {
 }
 
 size_t dataSize(const char* tableName, const struct Data list[], const size_t listSize) {
-  return 0ul;
+  // メモリのサイズ計算
+  size_t total = 0ul;
+  size_t tbl_name_size  = strlen(tableName);
+  total = tbl_name_size;
+  for(size_t i=0; i<listSize; i++) {
+      printData(&list[i]);
+      size_t col_size   = strlen(list[i].col);
+      total += col_size;
+      size_t const_size = strlen(list[i].constraint);
+      total += const_size;
+      printf("col_size is %ld\tconst_size is %ld\n", col_size, const_size);
+  }
+  return total;
 }
 
 /**
@@ -138,26 +150,13 @@ size_t dataSize(const char* tableName, const struct Data list[], const size_t li
   - struct Data のサイズ計算は他でも利用するので、別関数に切り出す。
   - 外部で確保された動的メモリに対して書き込みを行う、この関数の引数にする。
   - この関数での動的メモリ取得は行わない：）
+  
+  ... DONE. dataSize() で先にサイズ計算を行い内部でのメモリ動的確保は止めた。
+  @see test_createTableSql()
 
 */
-const char* createTableSql(const char* tableName, const struct Data list[], const size_t size) {
+void createTableSql(const char* tableName, const struct Data list[], const size_t listSize, char* sql) {
   puts("--------- createTableSql");
-  // メモリのサイズ計算
-  size_t total = 0;
-  size_t tbl_name_size  = strlen(tableName);
-  total = tbl_name_size;
-  for(size_t i=0; i<size; i++) {
-      printData(&list[i]);
-      size_t col_size   = strlen(list[i].col);
-      total += col_size;
-      size_t const_size = strlen(list[i].constraint);
-      total += const_size;
-      printf("col_size is %ld\tconst_size is %ld\n", col_size, const_size);
-  }
-  total*=2;
-  printf("total*2 is %ld\n", total);
-  char* sql = (char*)malloc(total);
-  sql[0] = '\0';
   // SQL 文の作成
   char step_1[] = "CREATE TABLE ";
   strcat(sql, step_1);
@@ -167,17 +166,15 @@ const char* createTableSql(const char* tableName, const struct Data list[], cons
   char comma[] = ",";
   char step_3[] = ")";
   strcat(sql, step_2);
-  for(size_t i=0; i<size; i++) {
+  for(size_t i=0; i<listSize; i++) {
     strcat(sql, list[i].col);
     strcat(sql, space);
     strcat(sql, list[i].constraint);
-    if(i+1 < size) {
+    if(i+1 < listSize) {
       strcat(sql, comma);      
     }
   }
   strcat(sql, step_3);
-//  free(sql);
-  return sql;
 }
 
 /**
@@ -216,12 +213,19 @@ int test_createTableSql() {
     struct Data list[] = {{"id",      "long",   "0", "BIGINT PRIMARY KEY"}
                          ,{"name",    "string",  "", "VARCHAR(128) NOT NULL"}
                          ,{"address", "string",  "", "VARCHAR(256) NOT NULL"}};
-    size_t s = sizeof(list)/sizeof(list[0]);
-    assert(s == 3);
-    printf("s is %ld\n", s);
-    const char* sql = createTableSql("company", list, s);
-    debug_string("sql is ", sql);
-    free((void*)sql);
+    size_t listSize = sizeof(list)/sizeof(list[0]);
+    assert(listSize == 3);
+    printf("listSize is %ld\n", listSize);
+    // struct Data のサイズ計算
+    size_t bufSize = dataSize("company", list, listSize);
+    bufSize*=3;   // テーブルの構成要素、カラム名、型、制約が相当小さくない限りは、これで充分だと思う。
+    printf("bufSize*3 is %ld\n", bufSize);
+    char* create_tbl_sql = (char*)malloc(bufSize);
+    create_tbl_sql[0] = '\0';
+    // CREATE TABLE 文の作成
+    createTableSql("company", list, listSize, create_tbl_sql);
+    debug_string("sql is ", create_tbl_sql);
+    free((void*)create_tbl_sql);
   return 0;
 }
 
@@ -267,11 +271,15 @@ int test_libpq_connect_create_tbl() {
   struct Data list[] = {{"id",      "long",   "0", "BIGINT PRIMARY KEY"}
                        ,{"name",    "string",  "", "VARCHAR(128) NOT NULL"}
                        ,{"address", "string",  "", "VARCHAR(256) NOT NULL"}};
-  size_t size = sizeof(list)/sizeof(list[0]);
-  const char* sql = createTableSql("company", list, size);
-  debug_string("sql is ", sql);
-  res = PQexec(conn, sql);
-  free((void*)sql);
+  size_t listSize = sizeof(list)/sizeof(list[0]);
+  size_t bufSize = dataSize("company", list, listSize);
+  bufSize*=3;
+  char* create_tbl_sql = (char*)malloc(bufSize);
+  create_tbl_sql[0] = '\0';
+  createTableSql("company", list, listSize, create_tbl_sql);
+  debug_string("sql is ", create_tbl_sql);
+  res = PQexec(conn, create_tbl_sql);
+  free((void*)create_tbl_sql);
   if (PQresultStatus(res) != PGRES_COMMAND_OK)
   {
     fprintf(stderr, "CREATE TABLE command failed: %s", PQerrorMessage(conn));
@@ -418,6 +426,10 @@ int main(void) {
     ret = test_createTableSql();
     debug_int("Play and Result ... ", &ret);
     assert(ret == 0);
+  }
+  if(1.02)   // 1.02 
+  {
+    int ret = 0;
     ret = test_libpq_connect_create_tbl();
     debug_int("Play and Result ... ", &ret);
     assert(ret == 0);
