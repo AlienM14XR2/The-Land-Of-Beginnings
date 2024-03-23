@@ -125,9 +125,20 @@ double dataTof(const struct Data* d) {
   }
 }
 
+size_t dataSize(const char* tableName, const struct Data list[], const size_t listSize) {
+  return 0ul;
+}
+
 /**
   SQL CREATE TABLE 文の作成。
     内部で動的にメモリを確保している、利用後は解放すること（これを書いていて何か虚しい：）。
+    
+    これを多少はよくできる方法。
+  
+  - struct Data のサイズ計算は他でも利用するので、別関数に切り出す。
+  - 外部で確保された動的メモリに対して書き込みを行う、この関数の引数にする。
+  - この関数での動的メモリ取得は行わない：）
+
 */
 const char* createTableSql(const char* tableName, const struct Data list[], const size_t size) {
   puts("--------- createTableSql");
