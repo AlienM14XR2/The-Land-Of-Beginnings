@@ -214,12 +214,14 @@ int test_createTableSql() {
   return 0;
 }
 
-int test_libpq_connect() {
+int test_libpq_connect_create_tbl() {
   // @see https://www.postgresql.jp/document/15/html/libpq-connect.html
   // @see https://www.postgresql.jp/document/8.0/html/libpq-example.html
-  puts("====== test_libpq_connect");
+  puts("====== test_libpq_connect_create_tbl");
   const char *conninfo = "host=localhost port=5432 dbname=jabberwocky user=derek password=derek1234 connect_timeout=10";
-  PGconn     *conn;
+  PGconn     *conn = NULL;
+  PGresult   *res  = NULL;
+  
   conn = PQconnectdb(conninfo);
   if(PQstatus(conn) != CONNECTION_OK)
   {
@@ -229,6 +231,51 @@ int test_libpq_connect() {
   } else {
     printf("... DONE connected.\n");
   }
+  /* トランザクションブロックを開始する。 */
+  res = PQexec(conn, "BEGIN");
+  if (PQresultStatus(res) != PGRES_COMMAND_OK)
+  {
+    fprintf(stderr, "BEGIN command failed: %s", PQerrorMessage(conn));
+    PQclear(res);
+    exit_nicely(conn);
+  }
+  /* 不要になったら、メモリリークを防ぐためにPGresultをPQclearすべき。*/
+  PQclear(res);
+  // DROP TABLE IF EXISTS company
+  res = PQexec(conn, "DROP TABLE IF EXISTS company");
+  if (PQresultStatus(res) != PGRES_COMMAND_OK)
+  {
+    fprintf(stderr, "DROP TABLE command failed: %s", PQerrorMessage(conn));
+    PQclear(res);
+    exit_nicely(conn);
+  }
+  /* 不要になったら、メモリリークを防ぐためにPGresultをPQclearすべき。*/
+  PQclear(res);
+  
+  // CREATE TABLE company
+  struct Data list[] = {{"id",      "long",   "0", "BIGINT PRIMARY KEY"}
+                       ,{"name",    "string",  "", "VARCHAR(128) NOT NULL"}
+                       ,{"address", "string",  "", "VARCHAR(256) NOT NULL"}};
+  size_t size = sizeof(list)/sizeof(list[0]);
+  const char* sql = createTableSql("company", list, size);
+  debug_string("sql is ", sql);
+  res = PQexec(conn, sql);
+  free((void*)sql);
+  if (PQresultStatus(res) != PGRES_COMMAND_OK)
+  {
+    fprintf(stderr, "CREATE TABLE command failed: %s", PQerrorMessage(conn));
+    PQclear(res);
+    exit_nicely(conn);
+  }
+  /* 不要になったら、メモリリークを防ぐためにPGresultをPQclearすべき。*/
+  PQclear(res);
+  /* ポータルを閉ざす。ここではエラーチェックは省略した… */
+//  res = PQexec(conn, "CLOSE myportal");   // 先に FETCH ALL in myportal が必要
+//  PQclear(res);
+  /* トランザクションを終了する */
+  res = PQexec(conn, "END");
+  PQclear(res);
+  /* データベースとの接続を閉じ、後始末を行う。 */
   PQfinish(conn);
   return 0;
 }
@@ -359,8 +406,8 @@ int main(void) {
     int ret = 0;
     ret = test_createTableSql();
     debug_int("Play and Result ... ", &ret);
-    assert(ret == 0);    
-    ret = test_libpq_connect();
+    assert(ret == 0);
+    ret = test_libpq_connect_create_tbl();
     debug_int("Play and Result ... ", &ret);
     assert(ret == 0);
   }
