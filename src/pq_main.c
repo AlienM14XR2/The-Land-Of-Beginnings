@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <time.h>
 #include "libpq-fe.h"
 
 /**
@@ -233,6 +234,8 @@ int test_libpq_connect_create_tbl() {
   // @see https://www.postgresql.jp/document/15/html/libpq-connect.html
   // @see https://www.postgresql.jp/document/8.0/html/libpq-example.html
   puts("====== test_libpq_connect_create_tbl");
+  clock_t start_clock = clock();
+  
   const char *conninfo = "host=localhost port=5432 dbname=jabberwocky user=derek password=derek1234 connect_timeout=10";
   PGconn     *conn = NULL;
   PGresult   *res  = NULL;
@@ -246,6 +249,7 @@ int test_libpq_connect_create_tbl() {
   } else {
     printf("... DONE connected.\n");
   }
+  clock_t start_clock_2 = clock();
   /* トランザクションブロックを開始する。 */
   res = PQexec(conn, "BEGIN");
   if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -278,6 +282,7 @@ int test_libpq_connect_create_tbl() {
   create_tbl_sql[0] = '\0';
   createTableSql("company", list, listSize, create_tbl_sql);
   debug_string("sql is ", create_tbl_sql);
+  clock_t start_clock_3 = clock();
   res = PQexec(conn, create_tbl_sql);
   free((void*)create_tbl_sql);
   if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -296,8 +301,72 @@ int test_libpq_connect_create_tbl() {
   PQclear(res);
   /* データベースとの接続を閉じ、後始末を行う。 */
   PQfinish(conn);
+  clock_t end_clock = clock();
+  printf("clock: %lf (sec)\n", (double)(end_clock-start_clock)/CLOCKS_PER_SEC);
+  printf("clock: %lf (sec)\n", (double)(end_clock-start_clock_2)/CLOCKS_PER_SEC);
+  printf("clock: %lf (sec)\n", (double)(end_clock-start_clock_3)/CLOCKS_PER_SEC);
   return 0;
 }
+
+/**
+  嫌な予感がする。libpq と libpqxx 、大差はないのかもしれない：）
+  これが事実なら、C 言語で開発する意味は無くなる。
+  確認するために、ベタ書きで INSERT 文を発行してみようかな。
+*/
+
+int test_libpq_insert_beta() {
+  puts("====== test_libpq_insert_beta");
+  const char *conninfo = "host=localhost port=5432 dbname=jabberwocky user=derek password=derek1234 connect_timeout=10";
+  PGconn     *conn = NULL;
+  PGresult   *res  = NULL;
+  
+  conn = PQconnectdb(conninfo);
+  if(PQstatus(conn) != CONNECTION_OK)
+  {
+    fprintf(stderr, "Connection to database failed: %s",
+    PQerrorMessage(conn));
+    exit_nicely(conn);
+  } else {
+    printf("... DONE connected.\n");
+  }
+  clock_t start_clock = clock();
+  
+  res = PQexec(conn, "BEGIN");
+  if (PQresultStatus(res) != PGRES_COMMAND_OK)
+  {
+    fprintf(stderr, "BEGIN command failed: %s", PQerrorMessage(conn));
+    PQclear(res);
+    exit_nicely(conn);
+  }
+  const char* paramValues[3];
+  paramValues[0] = "0";
+  paramValues[1] = "foo.co, ltd.";
+  paramValues[2] = "Tokyo";
+  PQexecParams(conn,
+                     "INSERT INTO company (id, name, address) VALUES ($1, $2, $3)",
+                     3,           /* パラメータ数。 */
+                     NULL,        /* バックエンドにパラメータの型を推測させる。 */
+                     paramValues,
+                     NULL,        /* テキストのため、パラメータ長は不要。 */
+                     NULL,        /* デフォルトで全てのパラメータはテキスト。 */
+                     0);          /* テキスト結果を要求。 */
+  /*
+  if (PQresultStatus(res) != PGRES_TUPLES_OK)
+  {
+    fprintf(stderr, "INSERT failed: %s", PQerrorMessage(conn));
+    PQclear(res);
+    exit_nicely(conn);
+  }
+  PQclear(res);
+  */
+  res =PQexec(conn, "END");
+  PQclear(res);
+  PQfinish(conn);
+  clock_t end_clock = clock();
+  printf("clock: %lf (sec)\n", (double)(end_clock-start_clock)/CLOCKS_PER_SEC);
+  return 0;
+}
+
 
 int test_Data() {
   puts("====== test_Data");
@@ -431,6 +500,9 @@ int main(void) {
   {
     int ret = 0;
     ret = test_libpq_connect_create_tbl();
+    debug_int("Play and Result ... ", &ret);
+    assert(ret == 0);
+    ret = test_libpq_insert_beta();
     debug_int("Play and Result ... ", &ret);
     assert(ret == 0);
   }
