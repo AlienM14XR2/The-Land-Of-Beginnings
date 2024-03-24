@@ -10,6 +10,9 @@
 #include <assert.h>
 #include <string.h>
 
+typedef void* H_FOO;    // 何らかのデータのハンドリングを表現したもの
+H_FOO creatFoo(const char * name, unsigned short pincode);   // ハンドラ生成
+int doSomething(H_FOO foo);                                  // ハンドラを利用した何らかの処理
 
 struct sample {
   int  i;
