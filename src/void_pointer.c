@@ -63,6 +63,27 @@ int test_FOO_Handler() {
     であろう。
 */
 
+/**
+    別件だが、void* を利用すれば、debug 出力が楽に書けないだろうか。
+    という疑問。
+    結論、long 系以外はやはり別途用意するしかなさそうだ。
+*/
+
+
+void debug_int(const char* _message, const int* _debug) {
+  printf("DEBUG: %s\tval: %d\taddr: %p\n", _message, *_debug, (void*)_debug);  
+}
+
+void debug_double(const char* _message, const double* _debug) {
+  printf("DEBUG: %s\tval: %lf\taddr: %p\n", _message, *_debug, (void*)_debug);  
+}
+
+void debug_long(const char* _message, const void* _debug) {
+  // -Werror=array-bounds これになる可能性がある、warning だけど、コンパイルオプションで エラーにしている：）
+  // 例えば、実引数に int 型の変数を指定した場合。
+  size_t* psz = (size_t*)_debug;
+  printf("DEBUG: %s\tval: %lu\taddr: %p\n", _message, *psz, _debug);
+}
 
 
 
@@ -125,6 +146,19 @@ int test_sizeof() {
 
 int main(void) {
   puts("START void ポインタについて ===");
+  if(0.01) {
+    long x = 33;
+    debug_long("x is ", (void*)&x);
+    unsigned long xx = 66;
+    debug_long("xx is ", (void*)&xx);
+    size_t xxx = 99;
+    debug_long("xxx is ", (void*)&xxx);
+    
+    int  y = 6;
+    debug_int("y is ", &y);
+    double pi = 3.141592;
+    debug_double("pi is ", &pi);
+  }
   if(1.00) {
     int ret = 0;
     printf("Play and Result ... %d\n", ret = test_memset());
