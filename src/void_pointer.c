@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <string.h>
 
-typedef void* H_FOO;    // 何らかのデータのハンドリングを表現したもの
+typedef void* H_FOO;                                         // 何らかのデータのハンドリングを表現したもの
 H_FOO creatFoo(const size_t id, const char* email);          // ハンドラ生成（メモリの動的取得）
 void freeFoo(H_FOO foo);                                     // ハンドラのメモリ解放
 int doSomething(H_FOO foo);                                  // ハンドラを利用した何らかの処理
@@ -57,6 +57,11 @@ int test_FOO_Handler() {
   return 0;
 }
 
+/**
+    上記のように void* を利用すれば、独自の型（なんでもあり）を表現でき、ハンドラ関数ではその独自型の実体、上例では
+  struct foo* としてアクセスし、カプセル化を実現できる。だたし、これは C 言語なので、紳士協定違反はいくらでも可能
+    であろう。
+*/
 
 
 
