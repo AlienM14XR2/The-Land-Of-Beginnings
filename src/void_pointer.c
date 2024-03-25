@@ -332,6 +332,32 @@ H_TREE moveLast(H_TREE _tree) {
   return (H_TREE)last;
 }
 
+size_t countTree(H_TREE _root) {
+  struct tree* current = (struct tree*)_root;
+  size_t i = 0;
+  while((current = hasNext(current)) != NULL) {
+    puts("------------ C");
+    i++;
+  }
+  i += 1;
+  return i;
+}
+
+void clearTree(H_TREE _root, size_t count) {  // このことは「肝に銘じよ」C 言語では削除する対象のサイズを先に計算しろ。
+  H_TREE array[count];    // この配列の宣言のやり方は GCC 以外でもできるのかな？ 添字に変数を利用しているんだよね。
+  struct tree* current = (struct tree*)_root;
+  array[0] = current;
+  size_t i = 1;
+  while((current = hasNext(current)) != NULL) {
+    array[i] = current;
+    i++;
+  }
+  for(i=0; i<count; i++ ) {
+    puts("------------ D");
+    free(array[i]);
+  }
+}
+
 H_TREE pushTree(H_TREE _root, void* value) {
   puts("--------- pushTree");
   struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
@@ -380,6 +406,7 @@ void* popTree(H_TREE _root) {
   return value;
 }
 
+
 int test_H_TREE() {
   puts("====== test_H_TREE");
   int a1 = 3;
@@ -407,7 +434,30 @@ int test_H_TREE() {
   pi = popTree(root);
   debug_int("pi is ", pi);
 //  pi = popTree(root);   // このコメントアウトを外すと バスエラー (コアダンプ)
+  return 0;
+}
 
+int test_H_TREE_2() {
+  puts("====== test_H_TREE_2");
+  int a1 = 3;
+  H_TREE root = createTree(&a1);
+  printf("root addr is \t%p\n", root);
+  int a2 = 6;
+  pushTree(root, &a2);
+  int a3 = 9;
+  pushTree(root, &a3);
+  int a4 = 12;
+  pushTree(root, &a4);
+  
+  H_TREE current = root;
+  debug_int("current->value is ", (int*)((struct tree*)current)->value);    
+  while((current = hasNext(current)) != NULL) {
+    debug_int("current->value is ", (int*)((struct tree*)current)->value);    
+  }
+  size_t count = countTree(root);
+  debug_long("count is ", &count);
+  clearTree(root, count);
+//  popTree(root);   // このコメントアウトを外すと バスエラー (コアダンプ)
   return 0;
 }
 
@@ -447,6 +497,8 @@ int main(void) {
   if(1.03) {  // 1.03
     int ret = 0;
     printf("Play and Result ... %d\n", ret = test_H_TREE());
+    assert(ret == 0);
+    printf("Play and Result ... %d\n", ret = test_H_TREE_2());
     assert(ret == 0);
   }
   puts("===   void ポインタについて   END");
