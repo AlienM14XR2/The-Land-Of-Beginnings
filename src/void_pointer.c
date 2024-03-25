@@ -144,6 +144,172 @@ int test_sizeof() {
   return 0;
 }
 
+
+
+/**
+  Linked List 
+  
+  void* を利用したものを考えてみる。
+    データ構造は  value と next で表現できるはず。
+  add() で追加、remove() で削除する。
+*/
+
+struct tree {
+  void* value;
+  struct tree* next;
+};
+
+
+
+/**
+  struct tree* を新規作成し、next に NULL を設定する。 
+    第一仮引数に NULL を許可し、その場合は Tree 構造の始まりとする。
+  
+  _trunk： Tree 構造の開始地点
+  _value： 値
+    戻り値： 新規作成された  tree のアドレス
+*/
+
+struct tree* tree_add(struct tree* _trunk, void* _value) {
+  puts("--------- tree_add");
+  struct tree* pt = NULL;
+  pt = (struct tree*)malloc(sizeof(struct tree));
+  pt->value = _value;
+  pt->next = NULL;
+  if(_trunk != NULL) {
+    _trunk->next = pt;    
+  }
+  return pt;
+}
+
+struct tree* tree_move_last(struct tree* _trunk) {
+  puts("--------- tree_move_last");
+  struct tree* next     = NULL;
+  struct tree* current  = NULL;
+  current = _trunk;
+  next    = _trunk->next;
+  while(next != NULL) {
+    if(next->next != NULL) {
+      current = next;
+      next    = next->next;
+    } else {
+      break;
+    }
+  }
+  // DEBUG
+  debug_int("current  value is ", (int*)current->value);
+  printf("current addr is \t%p\n", (void*)current);
+  if(next != NULL) {
+    debug_int("next value is ", (int*)next->value);
+    printf("next addr is \t%p\n", (void*)next);
+  }
+  // RESULT
+//  if(next == NULL) {
+//    return current;
+//  } else {
+//    return next;
+//  }
+  return next;
+}
+
+/**
+    最初の struct tree* を削除する。
+    削除対象の value を返却する。Queue に相当する動き。
+  _cursor は DEBUG 用
+*/
+void* tree_remove_first(struct tree* _trunk, struct tree* _cursor) {
+  puts("--------- tree_remove_first");
+  struct tree* next   = NULL;
+  void*        value  = NULL;
+  printf("_trunk addr is \t%p\n", (void*)_trunk);
+  if(_trunk != NULL) {
+    value = _trunk->value;
+    next  = _trunk->next;
+    free((void*)_trunk);
+    if(next == NULL) {
+      printf("next is null.\n");
+    } else {
+      *_cursor = *next;
+    }
+  }
+  return value;
+}
+
+void* tree_remove_last(struct tree* _trunk) {
+  puts("--------- tree_remove_last");
+  struct tree* next     = NULL;
+  struct tree* current  = NULL;
+  current = _trunk;
+  next    = _trunk->next;
+  while(next != NULL) {
+    if(next->next != NULL) {
+      current = next;
+      next    = next->next;
+    } else {
+      break;
+    }
+  }
+  if(next != NULL) {
+    void* value = next->value;
+    free((void*)next);
+    current->next = NULL;
+    return value;
+  }    
+  return NULL;
+}
+
+/**
+    すべての struct tree* を削除する。
+*/
+void tree_clear(struct tree* _trunk) {
+}
+
+int test_tree() {
+  puts("====== test_tree");
+  int v1 = 3;
+  int v2 = 6;
+  int v3 = 9;
+  int v4 = 12;
+  struct tree* cursor = NULL;
+  struct tree  trunk  = {&v1, NULL};
+  struct tree* trunk1 = NULL;
+  struct tree* trunk2 = NULL;
+  struct tree* trunk3 = NULL;
+  cursor = &trunk;
+  
+  trunk1 = tree_add(&trunk, &v2);
+  printf("trunk1 addr is \t%p\n", (void*)trunk1);
+  trunk2 = tree_add(trunk1, &v3);
+  printf("trunk2 addr is \t%p\n", (void*)trunk2);
+  trunk3 = tree_add(trunk2, &v4);
+  printf("trunk3 addr is \t%p\n", (void*)trunk3);
+  if(trunk.next != NULL) {
+    if(trunk.next->next != NULL) {
+      printf("trunk.next->next->value is %d\n", *(int*)trunk.next->next->value);
+    }
+  }
+  
+  cursor = tree_move_last(&trunk);
+  printf("cursor value is \t%d\n", *(int*)cursor->value);
+  
+  int* r3 = tree_remove_last(&trunk);
+  debug_int("r3 is ", r3);
+  
+  int* r1 = tree_remove_first(trunk1, cursor);
+  debug_int("r1 is ", r1);
+  int* r2 = tree_remove_first(trunk2, cursor);
+  debug_int("r2 is ", r2);
+  return 0;
+}
+
+/**
+    適当に作るにも程がある、我ながらイケてないと思うので、次回以降仕様から見直して作り直そう。
+  Root をもとに追加、削除ができないと使い物にはならないだろう。
+*/
+
+
+
+
 int main(void) {
   puts("START void ポインタについて ===");
   if(0.01) {
@@ -169,6 +335,11 @@ int main(void) {
   if(1.01) {
     int ret = 0;
     printf("Play and Result ... %d\n", ret = test_FOO_Handler());
+    assert(ret == 0);
+  }
+  if(1.02) {
+    int ret = 0;
+    printf("Play and Result ... %d\n", ret = test_tree());
     assert(ret == 0);
   }
   puts("===   void ポインタについて   END");
