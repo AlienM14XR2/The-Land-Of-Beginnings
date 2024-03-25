@@ -86,9 +86,6 @@ void debug_long(const char* _message, const void* _debug) {
 }
 
 
-
-
-
 struct sample {
   int  i;
   long l;
@@ -307,7 +304,112 @@ int test_tree() {
   Root をもとに追加、削除ができないと使い物にはならないだろう。
 */
 
+typedef void* H_TREE;
 
+H_TREE createTree(void* value) {
+  puts("--------- createTree");
+  struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
+  pt->value = value;
+  pt->next = NULL;
+  return (H_TREE)pt;
+}
+
+H_TREE hasNext(H_TREE _tree) {
+  return (H_TREE)((struct tree*)_tree)->next;
+}
+
+H_TREE moveLast(H_TREE _tree) {
+  puts("--------- moveLast");
+  struct tree* last = (struct tree*)_tree;
+  while(last != NULL) {
+    if(last->next != NULL) {
+      last = last->next;
+    } else {
+      break;
+    }
+  }
+  printf("last addr is \t%p\n", (void*)last);
+  return (H_TREE)last;
+}
+
+H_TREE pushTree(H_TREE _root, void* value) {
+  puts("--------- pushTree");
+  struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
+  pt->value = value;
+  pt->next = NULL;
+  struct tree* last = (struct tree*)moveLast(_root);
+  if(last == (struct tree*)_root) {
+      printf("------------ SAME\n");    
+    ((struct tree*)_root)->next = pt;
+  } else {
+    last->next = pt;
+  }
+  printf("pt addr is \t%p\n", (void*)pt);
+  return (H_TREE)pt;
+}
+
+void* popTree(H_TREE _root) {
+  puts("--------- popTree");
+  // 前方アドレスの付け替え後、削除する。
+  void* value = NULL;
+  struct tree* last     = (struct tree*)moveLast(_root);
+  struct tree* current  = (struct tree*)_root;
+  if(current == last) {
+    printf("------------ F1 SAME\n");
+    value   = last->value;
+    current = NULL;
+    free((void*)last); 
+  }
+  else if(current->next == last) {
+    printf("------------ F2 SAME\n");
+    value = last->value;
+    current->next = NULL;
+    free((void*)last);
+  } 
+  else {
+    while((current = (H_TREE)hasNext((H_TREE)current)) != NULL) {
+      if( ((struct tree*)current)->next == last ) {
+        printf("------------ SAME\n");
+        value = last->value;
+        ((struct tree*)current)->next = NULL;
+        free((void*)last);
+        break;
+      }
+    }
+  }
+  return value;
+}
+
+int test_H_TREE() {
+  puts("====== test_H_TREE");
+  int a1 = 3;
+  H_TREE root = createTree(&a1);
+  printf("root addr is \t%p\n", root);
+  int a2 = 6;
+  pushTree(root, &a2);
+  int a3 = 9;
+  pushTree(root, &a3);
+  int a4 = 12;
+  pushTree(root, &a4);
+  
+  H_TREE current = root;
+  debug_int("current->value is ", (int*)((struct tree*)current)->value);    
+  while((current = hasNext(current)) != NULL) {
+    debug_int("current->value is ", (int*)((struct tree*)current)->value);    
+  }
+  
+  int* pi = popTree(root);
+  debug_int("pi is ", pi);
+  pi = popTree(root);
+  debug_int("pi is ", pi);
+  pi = popTree(root);
+  debug_int("pi is ", pi);
+  pi = popTree(root);
+  debug_int("pi is ", pi);
+//  pi = popTree(root);   // このコメントアウトを外すと バスエラー (コアダンプ)
+
+  return 0;
+}
 
 
 int main(void) {
@@ -337,9 +439,14 @@ int main(void) {
     printf("Play and Result ... %d\n", ret = test_FOO_Handler());
     assert(ret == 0);
   }
-  if(1.02) {
+  if(1.02) {  // 1.02
     int ret = 0;
     printf("Play and Result ... %d\n", ret = test_tree());
+    assert(ret == 0);
+  }
+  if(1.03) {  // 1.03
+    int ret = 0;
+    printf("Play and Result ... %d\n", ret = test_H_TREE());
     assert(ret == 0);
   }
   puts("===   void ポインタについて   END");
