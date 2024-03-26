@@ -380,7 +380,7 @@ void* popTree(H_TREE _root) {
   void* value = NULL;
   struct tree* last     = (struct tree*)moveLast(_root);
   struct tree* current  = (struct tree*)_root;
-//  if(current == last) {
+//  if(current == last) {               // 当初は根っこも削除することに違和感を感じていなかったが、改めた。
 //    printf("------------ F1 SAME\n");
 //    value   = last->value;
 //    current = NULL;
@@ -425,7 +425,6 @@ int test_H_TREE() {
   pushTree(root, &a4);
   
   H_TREE current = root;
-//  debug_int("current->value is ", (int*)((struct tree*)current)->value);    
   while((current = hasNext(current)) != NULL) {
     debug_int("current->value is ", (int*)((struct tree*)current)->value);    
   }
