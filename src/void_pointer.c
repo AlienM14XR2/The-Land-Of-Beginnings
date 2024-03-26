@@ -306,10 +306,10 @@ int test_tree() {
 
 typedef void* H_TREE;
 
-H_TREE createTree(void* value) {
+H_TREE createTree() {
   puts("--------- createTree");
   struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
-  pt->value = value;
+  pt->value = NULL;
   pt->next = NULL;
   return (H_TREE)pt;
 }
@@ -380,13 +380,19 @@ void* popTree(H_TREE _root) {
   void* value = NULL;
   struct tree* last     = (struct tree*)moveLast(_root);
   struct tree* current  = (struct tree*)_root;
+//  if(current == last) {
+//    printf("------------ F1 SAME\n");
+//    value   = last->value;
+//    current = NULL;
+//    free((void*)last); 
+//  }
+//  else 
   if(current == last) {
-    printf("------------ F1 SAME\n");
-    value   = last->value;
-    current = NULL;
-    free((void*)last); 
-  }
-  else if(current->next == last) {
+    // ignore
+    return NULL;
+  } 
+  else
+  if(current->next == last) {
     printf("------------ F2 SAME\n");
     value = last->value;
     current->next = NULL;
@@ -409,8 +415,7 @@ void* popTree(H_TREE _root) {
 
 int test_H_TREE() {
   puts("====== test_H_TREE");
-  int a1 = 3;
-  H_TREE root = createTree(&a1);
+  H_TREE root = createTree();
   printf("root addr is \t%p\n", root);
   int a2 = 6;
   pushTree(root, &a2);
@@ -420,7 +425,7 @@ int test_H_TREE() {
   pushTree(root, &a4);
   
   H_TREE current = root;
-  debug_int("current->value is ", (int*)((struct tree*)current)->value);    
+//  debug_int("current->value is ", (int*)((struct tree*)current)->value);    
   while((current = hasNext(current)) != NULL) {
     debug_int("current->value is ", (int*)((struct tree*)current)->value);    
   }
@@ -432,15 +437,29 @@ int test_H_TREE() {
   pi = popTree(root);
   debug_int("pi is ", pi);
   pi = popTree(root);
+  if(pi != NULL) {
+    debug_int("pi is ", pi);
+  }
+  int a5 = 15;
+  int a6 = 18;
+  pushTree(root, &a5);
+  pushTree(root, &a6);
+  pi = popTree(root);
   debug_int("pi is ", pi);
-//  pi = popTree(root);   // このコメントアウトを外すと バスエラー (コアダンプ)
+  pi = popTree(root);
+  debug_int("pi is ", pi);
+  pi = popTree(root);
+  if(pi == NULL) {
+    printf("pi is NULL.\n");
+  }
+  size_t count = countTree(root);
+  clearTree(root, count);
   return 0;
 }
 
 int test_H_TREE_2() {
   puts("====== test_H_TREE_2");
-  int a1 = 3;
-  H_TREE root = createTree(&a1);
+  H_TREE root = createTree();
   printf("root addr is \t%p\n", root);
   int a2 = 6;
   pushTree(root, &a2);
@@ -450,7 +469,7 @@ int test_H_TREE_2() {
   pushTree(root, &a4);
   
   H_TREE current = root;
-  debug_int("current->value is ", (int*)((struct tree*)current)->value);    
+//  debug_int("current->value is ", (int*)((struct tree*)current)->value);    
   while((current = hasNext(current)) != NULL) {
     debug_int("current->value is ", (int*)((struct tree*)current)->value);    
   }
