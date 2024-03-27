@@ -299,7 +299,7 @@ void bar(void) {
   puts("------ bar");
 }
 
-void execute_template_1(void (*sub)(void)) {    // subroutine が引数を持たないものであれば、何でもよいはず。
+void execute_template(void (*sub)(void)) {    // subroutine が引数を持たないものであれば、何でもよいはず。
   puts("--- BEGIN");
   sub();
   puts("--- COMMIT");
@@ -307,8 +307,24 @@ void execute_template_1(void (*sub)(void)) {    // subroutine が引数を持た
 
 int test_execute_template_1() {
   puts("=== test_execute_template_1");
-  execute_template_1(foo);
-  execute_template_1(bar);
+  execute_template(foo);
+  execute_template(bar);
+  return EXIT_SUCCESS;
+}
+
+int test_execute_template_2() {
+  puts("=== test_execute_template_2");
+  H_TREE root = createTree();
+  
+//  pushTree(root, &foo);   // note: expected ‘void *’ but argument is of type ‘void (*)(void)’
+  /**
+      あぁ 関数ポインタにもそれぞれ型があるので、void* ではなくこの場合は、void (*)(void) でないと H_TREE による管理はできない：）
+  */
+  
+  size_t size = 0;
+  size = countTree(root);
+  debug_long("size is ", &size);
+  clearTree(root, size);
   return EXIT_SUCCESS;
 }
 
@@ -324,6 +340,8 @@ int main(void) {
   if(1.01) {
     int ret = 0;
     printf("play ane Result ... %d\n", ret = test_execute_template_1());
+    assert(ret == 0);
+    printf("play ane Result ... %d\n", ret = test_execute_template_2());
     assert(ret == 0);
   }
   puts("===   関数ポインタとバリエーション・ポイント   END");
