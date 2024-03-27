@@ -280,6 +280,37 @@ int test_tree_queue() {
   return EXIT_SUCCESS;
 }
 
+/**
+    ここから本題の関数ポインタとバリエーション・ポイントについて考えてみる。
+  H_TREE の stack 機能の他に queue を設けた理由、試したいことも本質的には
+    これだ。void* は 何でも受け付けるのだから、関数ポインタでもいいはずだ。
+    上例の H_TREE の値に関数ポインタを設定すれば、その関数を T_TREE から順次
+    実行することもできるのではないか。
+    まずは、Template Method パターンを考えてみる（以前も実装したはず：）。 
+*/
+
+//void (*template_method_1)(void);
+
+void foo(void) {
+  puts("------ foo");
+}
+
+void bar(void) {
+  puts("------ bar");
+}
+
+void execute_template_1(void (*sub)(void)) {    // subroutine が引数を持たないものであれば、何でもよいはず。
+  puts("--- BEGIN");
+  sub();
+  puts("--- COMMIT");
+}
+
+int test_execute_template_1() {
+  puts("=== test_execute_template_1");
+  execute_template_1(foo);
+  execute_template_1(bar);
+  return EXIT_SUCCESS;
+}
 
 int main(void) {
   puts("START 関数ポインタとバリエーション・ポイント ===");
@@ -290,6 +321,12 @@ int main(void) {
     printf("play ane Result ... %d\n", ret = test_tree_queue());
     assert(ret == 0);
   }
+  if(1.01) {
+    int ret = 0;
+    printf("play ane Result ... %d\n", ret = test_execute_template_1());
+    assert(ret == 0);
+  }
   puts("===   関数ポインタとバリエーション・ポイント   END");
   return EXIT_SUCCESS;
 }
+
