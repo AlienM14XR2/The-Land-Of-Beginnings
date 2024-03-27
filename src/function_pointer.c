@@ -192,6 +192,8 @@ void* popStack(H_TREE _root) {
 void* popQueue(H_TREE _root) {
   puts("--------- popQueue");
   // TODO 実装
+  // 先頭の ツリーハンドラは起点なので無視する
+  // 2 番目が対象であり、3 番目がある場合はそのアドレスを起点の next に代入する
   return NULL;
 }
 
@@ -228,7 +230,7 @@ int test_tree_stack() {
   nr = (int*)popStack(root);
   if(nr != NULL) { debug_int("5 nr is ", nr); }
   nr = (int*)popStack(root);
-  if(nr != NULL) { debug_int("6 nr is ", nr); }
+  if(nr != NULL) { debug_int("6 nr is ", nr); }   // これは出力されない
   
   size_t size = countTree(root);
   debug_long("size is ", &size);
