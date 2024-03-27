@@ -312,6 +312,15 @@ int test_execute_template_1() {
   return EXIT_SUCCESS;
 }
 
+/**
+    次のような構造体を用意すれば、戻り値、仮引数を持たない関数を
+    管理できる（はず）。
+*/
+
+struct sub {
+  void(*any)(void);
+};
+
 int test_execute_template_2() {
   puts("=== test_execute_template_2");
   H_TREE root = createTree();
@@ -320,6 +329,12 @@ int test_execute_template_2() {
   /**
       あぁ 関数ポインタにもそれぞれ型があるので、void* ではなくこの場合は、void (*)(void) でないと H_TREE による管理はできない：）
   */
+  
+  struct sub s1;
+  s1.any = foo;
+  s1.any();
+  s1.any = bar;
+  s1.any();
   
   size_t size = 0;
   size = countTree(root);
