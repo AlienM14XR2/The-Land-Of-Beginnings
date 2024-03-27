@@ -21,6 +21,22 @@
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
+void debug_int(const char* _message, const int* _debug) {
+  printf("DEBUG: %s\tval: %d\taddr: %p\n", _message, *_debug, (void*)_debug);  
+}
+
+void debug_double(const char* _message, const double* _debug) {
+  printf("DEBUG: %s\tval: %lf\taddr: %p\n", _message, *_debug, (void*)_debug);  
+}
+
+void debug_long(const char* _message, const void* _debug) {
+  // -Werror=array-bounds これになる可能性がある、warning だけど、コンパイルオプションで エラーにしている：）
+  // 例えば、実引数に int 型の変数を指定した場合。
+  size_t* psz = (size_t*)_debug;
+  printf("DEBUG: %s\tval: %lu\taddr: %p\n", _message, *psz, _debug);
+}
+
+
 /**
     先に実装した H_TREE そのスタックとしての振る舞い。
     それをここに移植する。各関数名をその振る舞いに合わせる。
@@ -80,10 +96,10 @@ H_TREE moveLast(H_TREE _tree) {
     ツリーハンドラの要素数と根の合計数を返却する。
 */
 size_t countTree(H_TREE _root) {
+  puts("--------- countTree");
   struct tree* current = (struct tree*)_root;
   size_t i = 0;
   while((current = hasNext(current)) != NULL) {
-    puts("------------ C");
     i++;
   }
   i += 1;     // これは root も含めて返却している。
@@ -95,6 +111,7 @@ size_t countTree(H_TREE _root) {
     根も削除する。
 */
 void clearTree(H_TREE _root, size_t count) {  // このことは「肝に銘じよ」C 言語では削除する対象のサイズを先に計算しろ。
+  puts("--------- clearTree");
   H_TREE array[count];    // この配列の宣言のやり方は GCC 以外でもできるのかな？ 添字に変数を利用しているんだよね。
   struct tree* current = (struct tree*)_root;
   array[0] = current;
@@ -126,6 +143,15 @@ H_TREE pushTree(H_TREE _root, void* value) {
   }
   printf("pt addr is \t%p\n", (void*)pt);
   return (H_TREE)pt;
+}
+
+void* getValue(H_TREE current) {
+  puts("--------- getValue");
+  if(current != NULL) {
+    return ((struct tree*)current)->value;
+  } else {
+    return NULL;
+  }
 }
 
 /**
@@ -163,14 +189,61 @@ void* popStack(H_TREE _root) {
   return value;
 }
 
-void* popQueue() {
+void* popQueue(H_TREE _root) {
+  puts("--------- popQueue");
   // TODO 実装
   return NULL;
 }
 
 
+int test_tree_stack() {
+  puts("=== test_tree_stack");
+  H_TREE root = createTree();
+  
+  int n1 = 3;
+  pushTree(root, &n1);
+  int n2 = 6;
+  pushTree(root, &n2);
+  int n3 = 9;
+  pushTree(root, &n3);
+  int n4 = 12;
+  pushTree(root, &n4);
+  int n5 = 15;
+  pushTree(root, &n5);
+  
+  H_TREE tmp = root;
+  while((tmp = hasNext(tmp)) != NULL) {
+    debug_int("value is ", (int*)getValue(tmp));
+  }
+  
+  int* nr = NULL;
+  nr = (int*)popStack(root);
+  if(nr != NULL) { debug_int("1 nr is ", nr); }
+  nr = (int*)popStack(root);
+  if(nr != NULL) { debug_int("2 nr is ", nr); }
+  nr = (int*)popStack(root);
+  if(nr != NULL) { debug_int("3 nr is ", nr); }
+  nr = (int*)popStack(root);
+  if(nr != NULL) { debug_int("4 nr is ", nr); }
+  nr = (int*)popStack(root);
+  if(nr != NULL) { debug_int("5 nr is ", nr); }
+  nr = (int*)popStack(root);
+  if(nr != NULL) { debug_int("6 nr is ", nr); }
+  
+  size_t size = countTree(root);
+  debug_long("size is ", &size);
+  clearTree(root, size);
+  return EXIT_SUCCESS;
+}
+
+
 int main(void) {
   puts("START 関数ポインタとバリエーション・ポイント ===");
+  if(1.00) {
+    int ret = 0;
+    printf("play ane Result ... %d\n", ret = test_tree_stack());
+    assert(ret == 0);
+  }
   puts("===   関数ポインタとバリエーション・ポイント   END");
   return EXIT_SUCCESS;
 }
