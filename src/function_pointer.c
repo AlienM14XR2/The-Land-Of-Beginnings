@@ -327,15 +327,41 @@ int test_execute_template_2() {
   
 //  pushTree(root, &foo);   // note: expected ‘void *’ but argument is of type ‘void (*)(void)’
   /**
-      あぁ 関数ポインタにもそれぞれ型があるので、void* ではなくこの場合は、void (*)(void) でないと H_TREE による管理はできない：）
+        あぁ 関数ポインタにもそれぞれ型があるので、void* ではなくこの場合は、void (*)(void) でないと H_TREE による管理はできない：）
   */
   
+  struct sub s;
+  s.any = foo;
+  s.any();
+  s.any = bar;
+  s.any();
+  /**
+        上記が出来ればもう充分だが、折角なので H_TREE で管理してみる。
+        最初に構造体の要素に関数ポインタを指定する。その構造体を H_TREE 
+        の管理化に置き、popQueue() で取り出し、関数を呼び出す。
+  */
   struct sub s1;
   s1.any = foo;
-  s1.any();
-  s1.any = bar;
-  s1.any();
-  
+  pushTree(root, &s1);
+  struct sub s2;
+  s2.any = bar;
+  pushTree(root, &s2);
+
+  struct sub* rs = NULL;
+  rs = (struct sub*)popQueue(root);
+  if(rs != NULL) {
+    rs->any();
+  }
+  rs = (struct sub*)popQueue(root);
+  if(rs != NULL) {
+    rs->any();
+  }
+  /**
+         関数の持ち出し、任意のタイミングでの呼び出しができるということ。
+         これをさらに発展させれば、クラスというか、関数の仮引数も含めた
+         構造体も表現できるよね。
+  */
+    
   size_t size = 0;
   size = countTree(root);
   debug_long("size is ", &size);
