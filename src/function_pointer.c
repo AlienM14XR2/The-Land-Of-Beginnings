@@ -189,12 +189,22 @@ void* popStack(H_TREE _root) {
   return value;
 }
 
+/**
+    起点の次、仮の先頭の値の取り出しとそのツリーハンドラの削除を行う。
+  queue と同じ動作（First-in First-out）。
+*/
 void* popQueue(H_TREE _root) {
   puts("--------- popQueue");
-  // TODO 実装
   // 先頭の ツリーハンドラは起点なので無視する
   // 2 番目が対象であり、3 番目がある場合はそのアドレスを起点の next に代入する
-  return NULL;
+  void* value = NULL;
+  struct tree* second = ((struct tree*)_root)->next;
+  if(second != NULL) {
+    value                       = second->value;
+    ((struct tree*)_root)->next = second->next;
+    free((void*)second);
+  }
+  return value;
 }
 
 
@@ -238,12 +248,46 @@ int test_tree_stack() {
   return EXIT_SUCCESS;
 }
 
+int test_tree_queue() {
+  puts("=== test_tree_queue");
+  H_TREE root = createTree();
+  
+  int n1 = 3;
+  pushTree(root, &n1);
+  int n2 = 6;
+  pushTree(root, &n2);
+  int n3 = 9;
+  pushTree(root, &n3);
+  
+  H_TREE tmp = root;
+  while((tmp = hasNext(tmp)) != NULL) {
+    debug_int("value is ", (int*)getValue(tmp));
+  }
+  
+  int* nr = NULL;
+  nr = (int*)popQueue(root);
+  if(nr != NULL) { debug_int("1 nr is ", nr); }
+  nr = (int*)popQueue(root);
+  if(nr != NULL) { debug_int("2 nr is ", nr); }
+  nr = (int*)popQueue(root);
+  if(nr != NULL) { debug_int("3 nr is ", nr); }
+  nr = (int*)popQueue(root);
+  if(nr != NULL) { debug_int("4 nr is ", nr); }   // これは出力されない
+  
+  size_t size = countTree(root);
+  debug_long("size is ", &size);
+  clearTree(root, size);
+  return EXIT_SUCCESS;
+}
+
 
 int main(void) {
   puts("START 関数ポインタとバリエーション・ポイント ===");
   if(1.00) {
     int ret = 0;
     printf("play ane Result ... %d\n", ret = test_tree_stack());
+    assert(ret == 0);
+    printf("play ane Result ... %d\n", ret = test_tree_queue());
     assert(ret == 0);
   }
   puts("===   関数ポインタとバリエーション・ポイント   END");
