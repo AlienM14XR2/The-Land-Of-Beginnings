@@ -94,16 +94,14 @@ int test_getFileSize() {
   return EXIT_SUCCESS;
 }
 
-void createBuffer(char* _buffer, size_t _size) {
+void createBuffer(char* _buffer, size_t _size) {  // この関数を使うのは止める。
   puts("--- createBuffer");
-  _buffer = (char*)malloc(sizeof(char)*_size);    // sizeof(char) は 1 byte だから意味ないかも。
+  _buffer = (char*)malloc(_size);    // sizeof(char) は 1 byte だから意味ないかも。
   if(_buffer == NULL) {
     print_error("malloc faile.");    
     exit(EXIT_FAILURE);
   }
-  for(size_t i=0; i<(sizeof(char)*_size); i++) {
-    _buffer[i] = '\0';
-  }
+  memset(_buffer, '\0', _size);
 }
 
 void removeBuffer(char* _buffer) {
@@ -141,21 +139,16 @@ void readFile(const char* _filePath, char* _buf) {
   FILE*  fp          = NULL;
   char   tmp[1024+1] = "\0";
   size_t readSize    = 0;
-  
-  // ファイルのサイズ計算と必要メモリの確保
-  size_t size = getFileSize(_filePath);
-  createBuffer(_buf, size+1);
-  
+    
   fp = fopen(_filePath, "r");
   if(fp != NULL) {    
     // ファイルの読み込みとメモリへの書き込み
     memset(tmp, '\0', 1024+1);
     while((readSize = fread(tmp, 1, 1024, fp)) != 0) {
-      printf("%s",tmp);
+      strcat(_buf, tmp);
       memset(tmp, '\0', 1024+1);  // この一行がなく、初期化できていなかったのが原因だった。
     }
     printf("\n");
-    
     fclose(fp);
   } else {
     print_error("not file open.");
@@ -165,9 +158,13 @@ void readFile(const char* _filePath, char* _buf) {
 
 int test_readFile() {
   puts("=== test_readFile");
-  char* buf = NULL;
-  readFile(FILE_PATH, buf);   // この仕組みだと上手くいかない、原因が不明なので別の方法を探る。最後まで Read できていない：）
+  size_t size = getFileSize(FILE_PATH);
+  char* buf = (char*)malloc(size+1);
+  memset(buf, '\0', size+1);
+
+  readFile(FILE_PATH, buf);   // この関数内で動的にメモリを確保することがよくなかった。
   if(buf != NULL) {
+    printf("%s\n", buf);      // これでプログラム上でファイルの中身がみれるようになった。
     removeBuffer(buf);      
   }
   return EXIT_SUCCESS;  
