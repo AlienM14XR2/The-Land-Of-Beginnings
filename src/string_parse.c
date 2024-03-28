@@ -165,6 +165,65 @@ int test_readFile() {
   readFile(FILE_PATH, buf);   // この関数内で動的にメモリを確保することがよくなかった。
   if(buf != NULL) {
     printf("%s\n", buf);      // これでプログラム上でファイルの中身がみれるようになった。
+    
+    /**
+    '<' タグ名 '>' 欲しい値  '<'/ タグ名 '>'
+    INPUT タグなど上記に当てはまらないものは考えないし、ゴミの混入もあり得ると思う。
+        しかし、私が欲しいデータは多分上記のパターンのものであってる。自信はないが。
+    '<' を検知、タグ名が検索指定されたものか調べる（言葉では簡単だが、これが厄介だと思う）。
+        タグ名がヒットした場合は、最初に見つかる '>' の位置を記憶しておく（取得位置）。
+        
+        記憶した取得位置から、最初に見つかる'<'の一つ手前までが欲しい値ということ。少なくとも、検知
+        と取得の 2 回 データの走査が行われるし、1 文字ずつ検査したら時間かかるだろうなと思う：）
+        止めようかな：）
+    */
+//    char tmp[2048];
+//    memset(tmp, '\0', sizeof(tmp)/sizeof(tmp[0]));
+    int status = 0;
+    for(size_t i=0; i<size; i++) {
+      if(status == 3) {
+        if(buf[i] == '<') {
+          status = 0;
+          printf("\t");
+        } else {
+          printf("%c", buf[i]);
+        }
+      }
+      if(buf[i] == '>' && status == 2) {
+        status = 3;
+      }
+      if(buf[i] == 'a' && status == 1) {
+        status = 2;
+//        printf("%c", buf[i]);
+      }
+      if(buf[i] == '<' && status == 0) {
+        status = 1;
+      }
+    }
+    /**
+          欲しい情報が属性、href="ここだったり：）"するのか、ダイレクトに文字列一致の仕組みが必要
+          ということになるな。C++ の方がいいような気がしてきたが、まだ遊べるだろ。
+    */
+    char pattern[] = "href=";
+    char* start    = &buf[0];
+    char* hitPos   = NULL;
+    
+    do {
+      hitPos = strstr(start, pattern);
+      if(hitPos != NULL) {
+        printf("%p に %s あり\n", hitPos, pattern);
+        start = hitPos + 1;
+      }
+    } while(hitPos != NULL);
+    /**
+          当然だよね、現代の Web とは、JSON と JavaScript で構築されている。
+          ベタ書きされた静的な HTML などほぼ無いのではなかろうか。つまり、
+          ページを復元するにはそれらもトレースする必要がある orz 大昔にも似
+          たような問題に当たったよね：）
+    */
+    
+    
+    
     removeBuffer(buf);      
   }
   return EXIT_SUCCESS;  
