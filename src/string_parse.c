@@ -96,13 +96,14 @@ int test_getFileSize() {
 
 void createBuffer(char* _buffer, size_t _size) {
   puts("--- createBuffer");
-  debug_long("size is ", &_size);
-  _buffer = (char*)malloc(_size);
+  _buffer = (char*)malloc(sizeof(char)*_size);    // sizeof(char) は 1 byte だから意味ないかも。
   if(_buffer == NULL) {
     print_error("malloc faile.");    
     exit(EXIT_FAILURE);
   }
-  _buffer = '\0';
+  for(size_t i=0; i<(sizeof(char)*_size); i++) {
+    _buffer[i] = '\0';
+  }
 }
 
 void removeBuffer(char* _buffer) {
@@ -115,12 +116,62 @@ int test_Create_Remove_Buf() {
   char* buf = NULL;
   size_t size = getFileSize(FILE_PATH);
   size += 1;
+  debug_long("size is ", &size);
+  /*
+  size_t sz = sizeof(char)*size;
+  debug_long("sz is ", &sz);
+  buf = (char*)malloc(sz);
+  if(buf != NULL) {
+    for(size_t i=0; i<sz; i++) {
+      buf[i] = '\0';
+    }
+    char str[1024] = "moji.";
+    strcat(buf,str);
+    printf("%s\n", buf);
+    free((void*)buf);
+  }
+  */
   createBuffer(buf, size);
   removeBuffer(buf);  
   return EXIT_SUCCESS;
 }
 
+void readFile(const char* _filePath, char* _buf) {
+  puts("--- readFile");
+  FILE*  fp          = NULL;
+  char   tmp[1024+1] = "\0";
+  size_t readSize    = 0;
+  
+  // ファイルのサイズ計算と必要メモリの確保
+  size_t size = getFileSize(_filePath);
+  createBuffer(_buf, size+1);
+  
+  fp = fopen(_filePath, "r");
+  if(fp != NULL) {    
+    // ファイルの読み込みとメモリへの書き込み
+    memset(tmp, '\0', 1024+1);
+    while((readSize = fread(tmp, 1, 1024, fp)) != 0) {
+      printf("%s",tmp);
+    }
+    printf("%s",tmp);
+    printf("\n");
+    
+    fclose(fp);
+  } else {
+    print_error("not file open.");
+    exit(1);
+  }
+}
 
+int test_readFile() {
+  puts("=== test_readFile");
+  char* buf = NULL;
+  readFile(FILE_PATH, buf);   // この仕組みだと上手くいかない、原因が不明なので別の方法を探る。最後まで Read できていない：）
+  if(buf != NULL) {
+    removeBuffer(buf);      
+  }
+  return EXIT_SUCCESS;  
+}
 
 int main(void) {
   puts("START 文字列の解析 ===");
@@ -129,6 +180,11 @@ int main(void) {
     printf("Play and Result ... %d\n", ret = test_getFileSize());
     assert(ret == 0);
     printf("Play and Result ... %d\n", ret = test_Create_Remove_Buf());
+    assert(ret == 0);
+  }
+  if(1.01) {
+    int ret = 0;
+    printf("Play and Result ... %d\n", ret = test_readFile());
     assert(ret == 0);
   }
   puts("===   文字列の解析  END");
