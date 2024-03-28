@@ -152,8 +152,8 @@ void readFile(const char* _filePath, char* _buf) {
     memset(tmp, '\0', 1024+1);
     while((readSize = fread(tmp, 1, 1024, fp)) != 0) {
       printf("%s",tmp);
+      memset(tmp, '\0', 1024+1);  // この一行がなく、初期化できていなかったのが原因だった。
     }
-    printf("%s",tmp);
     printf("\n");
     
     fclose(fp);
