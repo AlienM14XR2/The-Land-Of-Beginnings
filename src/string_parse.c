@@ -518,6 +518,82 @@ int test_searchProto() {
 */
 
 
+void search2nd(char* _buf, const char* _start_pattern, const char* _end_pattern, const char _limitCh) {
+  puts("------ search2nd");
+  if(_buf != NULL) {
+    size_t ptnSize  = strlen( _start_pattern);
+    char* start     = &_buf[0];
+    char* hitPos    = NULL;
+    H_TREE root     = createTree();
+    size_t hitCount = 0;
+    // 検索文字（パターン）に該当する箇所（アドレス）の取得    
+    do {
+      hitPos = strstr(start, _start_pattern);
+      if(hitPos != NULL) {
+        hitPos += ptnSize;
+        pushTree(root, hitPos);
+        start = hitPos + 1;
+        hitCount++;
+      }
+    } while(hitPos != NULL);
+    debug_long("hitCount is ", &hitCount);
+    // 実際の値を _limitCh 以前で取得する
+    H_TREE tmp     = root;
+    char url[1025] = "\0";                // 次のステップは、これを返却する仕組みが必要（H_TREE の value その動的メモリでいけるかな、解放忘れ怖いな：）。
+    int i = 0;
+    while((tmp = hasNext(tmp)) != NULL) {
+      char* searchPos = (char*)getValue(tmp);
+      memset(url, '\0', 1025);
+      i = 0;
+      while(1) {
+        if(*searchPos != _limitCh) {
+          url[i] = *searchPos;
+        }
+        if(i == 1024 || *searchPos == _limitCh) {
+          printf("%s\n", url);
+          break;
+        }
+        searchPos++;
+        i++;
+      }
+    }
+    printf("\n");    
+    clearTree(root, countTree(root));
+  } else {
+    printf("_buf is null.\n");
+  }
+}
+
+struct range {
+  char* start;
+  char* end;
+};
+
+int test_search2nd() {
+  puts("=== test_search2nd");
+  size_t size = getFileSize(FILE_PATH);
+  char* buf = (char*)malloc(size+1);
+  memset(buf, '\0', size+1);
+  readFile(FILE_PATH, buf);
+  
+  char startPattern[]    = "{\"videoRenderer\":";
+  char endPattern[]      = "\"}}}]},\"shortBylineText\"";
+  printf("startPattern is \t%s\n", startPattern);
+  printf("endPattern   is \t%s\n", endPattern);
+  
+  /**
+    search2nd() を実装するにあたり、最初に validation を行う必要がこれはある。
+      そもそもが「ヤマカン」であるため、設定するパラメータで正しく機能する保証がないから（JSON として正しいこととは別の話）。
+      - 最低限、_startPattern と _endPattern でヒットする数が同じこと。
+      - 各 start と end の組み合わせにおいて、アドレスが start < end であること。
+  */
+  
+  removeBuffer(buf);
+  return EXIT_SUCCESS;
+}
+
+
+
 
 int main(void) {
   puts("START 文字列の解析 ===");
@@ -536,6 +612,11 @@ int main(void) {
   if(1.02) {
     int ret = 0;
     printf("Play and Result ... %d\n", ret = test_searchProto());
+    assert(ret == 0);
+  }
+  if(1.03) {
+    int ret = 0;
+    printf("Play and Result ... %d\n", ret = test_search2nd());
     assert(ret == 0);
   }
   puts("===   文字列の解析  END");
