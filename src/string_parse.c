@@ -509,6 +509,14 @@ int test_searchProto() {
   return EXIT_SUCCESS;
 }
 
+/**
+    少しだけターゲットの解析をしてみた。取得するデータの終端も文字列で検索できないと意味
+    がない、あるいは不自由を来すおそれがある。
+    e.g. 先頭の文字列 "{\"videoRenderer\"" 終端の文字列 "\"}}}]},\"shortBylineText\""
+  上例のような形が JSON であるため。
+  これを先に考えてみよう。
+*/
+
 
 
 int main(void) {
