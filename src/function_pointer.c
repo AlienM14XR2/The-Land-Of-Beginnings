@@ -412,6 +412,22 @@ int test_try_catch() {
   Web を見れば、マクロで実現しているもの、DL すれば使えるもの等はあるがね。
 */
 
+int test_try_catch_2() {
+  puts("=== test_try_catch_2");
+  int rj = setjmp(jb);
+  debug_int("rj is ", &rj);
+  if(rj) {
+    puts("catch に相当する");
+    return EXIT_FAILURE;
+  }
+  func_1();
+  return EXIT_SUCCESS;
+}
+
+/**
+    私としては、この程度で充分なんだよ。何らかの関数を実装し、そのテスト及び
+    アサーションを検知したいだけなので。
+*/
 
 
 
@@ -436,6 +452,8 @@ int main(void) {
     int ret = 0;
     printf("play ane Result ... %d\n", ret = test_try_catch());
     assert(ret == 0);
+    printf("play ane Result ... %d\n", ret = test_try_catch_2());
+    assert(ret == 1);
   }
   puts("===   関数ポインタとバリエーション・ポイント   END");
   return EXIT_SUCCESS;
