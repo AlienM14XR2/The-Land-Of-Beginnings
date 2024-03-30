@@ -446,7 +446,7 @@ int test_readFile() {
   return EXIT_SUCCESS;  
 }
 
-void searchProto(char* _buf, const char* _pattern, const char _limitCh/*, H_TREE _dest*/) {
+void searchProto(H_TREE _dest, size_t _destSize, char* _buf, const char* _pattern, const char _limitCh) {
   puts("------ searchProto");
   if(_buf != NULL) {
     size_t ptnSize  = strlen(_pattern);
@@ -460,26 +460,26 @@ void searchProto(char* _buf, const char* _pattern, const char _limitCh/*, H_TREE
       if(hitPos != NULL) {
         hitPos += ptnSize;
         pushTree(root, hitPos);
-//        printf("%p に %s あり\n", hitPos, _pattern);
         start = hitPos + 1;
         hitCount++;
       }
     } while(hitPos != NULL);
     debug_long("hitCount is ", &hitCount);
-    // 実際の値を _limitCh 以前で取得する
+    // 実際の値を _limitCh より前で取得する
     H_TREE tmp     = root;
-    char url[1025] = "\0";                // 次のステップは、これを返却する仕組みが必要（H_TREE の value その動的メモリでいけるかな、解放忘れ怖いな：）。
-    int i = 0;
+    size_t i = 0;
+    size_t limitSize = ((sizeof(char))*_destSize) - 1;
     while((tmp = hasNext(tmp)) != NULL) {
+      char* str = (char*)malloc((sizeof(char))*_destSize);  // char は 1 byte だけどね。
       char* searchPos = (char*)getValue(tmp);
-      memset(url, '\0', 1025);
+      memset(str, '\0', (sizeof(char))*_destSize);
       i = 0;
       while(1) {
         if(*searchPos != _limitCh) {
-          url[i] = *searchPos;
+          str[i] = *searchPos;
         }
-        if(i == 1024 || *searchPos == _limitCh) {
-          printf("%s\n", url);
+        if(i == limitSize || *searchPos == _limitCh) {
+          pushTree(_dest, str);
           break;
         }
         searchPos++;
@@ -500,14 +500,34 @@ int test_searchProto() {
   memset(buf, '\0', size+1);
   readFile(FILE_PATH, buf);
   
+  size_t strSize    = 1025;
+  H_TREE tmp        = NULL;
   char pattern[]    = "href=\"";
-  searchProto(buf, pattern, '"');
+  H_TREE t1 = createTree();
+  searchProto(t1, strSize, buf, pattern, '"');
+  tmp = t1;
+  while((tmp = hasNext(tmp)) != NULL) {
+    char* str = (char*)getValue(tmp);
+    printf("%s\n", str);
+    free((void*)str);
+  }
   char pattern_2[]  = "videoId\":\"";
-  searchProto(buf, pattern_2, '"');
+  H_TREE t2 = createTree();
+  searchProto(t2, strSize, buf, pattern_2, '"');
+  tmp = t2;
+  while((tmp = hasNext(tmp)) != NULL) {
+    char* str = (char*)getValue(tmp);
+    printf("%s\n", str);
+    free((void*)str);
+  }
   
+  clearTree(t1, countTree(t1));
+  clearTree(t2, countTree(t2));
   removeBuffer(buf);
   return EXIT_SUCCESS;
 }
+
+
 
 /**
     少しだけターゲットの解析をしてみた。取得するデータの終端も文字列で検索できないと意味
@@ -661,17 +681,17 @@ int main(void) {
     printf("Play and Result ... %d\n", ret = test_Create_Remove_Buf());
     assert(ret == 0);
   }
-  if(0) {    // 1.01
+  if(0) {       // 1.01
     int ret = 0;
     printf("Play and Result ... %d\n", ret = test_readFile());
     assert(ret == 0);
   }
-  if(1.02) {
+  if(1.02) {    // 1.02
     int ret = 0;
     printf("Play and Result ... %d\n", ret = test_searchProto());
     assert(ret == 0);
   }
-  if(1.03) {
+  if(1.03) {    // 1.03
     int ret = 0;
     printf("Play and Result ... %d\n", ret = test_search2nd());
     assert(ret == 0);
