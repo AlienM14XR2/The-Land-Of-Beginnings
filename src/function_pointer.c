@@ -17,9 +17,11 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <setjmp.h>
 
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
+// 次のものはすでに定義されているのでいらない。
+//#define EXIT_SUCCESS 0
+//#define EXIT_FAILURE 1
 
 void debug_int(const char* _message, const int* _debug) {
   printf("DEBUG: %s\tval: %d\taddr: %p\n", _message, *_debug, (void*)_debug);  
@@ -369,6 +371,51 @@ int test_execute_template_2() {
   return EXIT_SUCCESS;
 }
 
+/**
+  関数ポインタではないが、Try Catch の概念、それを考える。
+  setjmp と longjmp を使ってみる。
+*/
+
+static jmp_buf jb;
+
+void func_1() {
+  longjmp(jb, 1); // 何か処理上の問題があったら、longjmp() をコールする、これは、setjmp() の地点へ第2仮引数に指定した値を持って戻る。
+}
+
+int test_try_catch() {
+  puts("=== test_try_catch");
+  /**
+      ここで注意点がある。longjmp() から setjmp() 地点へ戻ってきた際には
+   volatile 修飾されていないローカル変数の値は未定義になるということ。
+      したがって、戻ってきた際にローカル変数の利用を考えているのであれば、
+      必ず、volatile 修飾すること。
+      次の実験はその例になる。変数 a と b の違いに注目してほしい。
+   ??? ん、どちらも同じように機能するね。参考にした書籍の情報が古いのかな。 ???
+  */
+  volatile int a = 0;
+  int          b = 0;
+  
+  int rj = setjmp(jb);
+  debug_int("rj is ", &rj);
+  if(a < 3) {
+    debug_int("a is ", (const int*)&a);
+    debug_int("b is ", &b);
+    a++;
+    b++;
+    func_1();
+  }
+  return EXIT_SUCCESS;
+}
+
+/**
+    気を取り直して本題の Try Catch を考えるか。
+  Web を見れば、マクロで実現しているもの、DL すれば使えるもの等はあるがね。
+*/
+
+
+
+
+
 int main(void) {
   puts("START 関数ポインタとバリエーション・ポイント ===");
   if(1.00) {
@@ -383,6 +430,11 @@ int main(void) {
     printf("play ane Result ... %d\n", ret = test_execute_template_1());
     assert(ret == 0);
     printf("play ane Result ... %d\n", ret = test_execute_template_2());
+    assert(ret == 0);
+  }
+  if(1.02) {
+    int ret = 0;
+    printf("play ane Result ... %d\n", ret = test_try_catch());
     assert(ret == 0);
   }
   puts("===   関数ポインタとバリエーション・ポイント   END");
