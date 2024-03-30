@@ -570,25 +570,27 @@ bool isValidRange(H_TREE _startPos, H_TREE _endPos) {
   return false;
 }
 
-void search2nd(H_TREE _startPos, H_TREE _endPos, char _beforeLimitPos) 
+void search2nd(H_TREE _dest, H_TREE _startPos, H_TREE _endPos, char _beforeLimitPos) 
 {
   puts("------ search2nd");
   char* start      = NULL;
   char* end        = NULL;
-  char  json[5121] = "\0";
-  memset(json, '\0', 5121);
-  size_t sz = countTree(_startPos);   // countTree() は 要素数 + 1 を返却する。 +1 は H_TREE の根（root）。  
+  size_t sz = countTree(_startPos);       // countTree() は 要素数 + 1 を返却する。 +1 は H_TREE の根（root）。  
   debug_long("sz is ", &sz);
   for(size_t i=0 ; i<(sz-1); i++) {
     start    = (char*)popQueue(_startPos);
     end      = (char*)popQueue(_endPos);
-    end += _beforeLimitPos;   // limitCh の直前まで移動
+    end += _beforeLimitPos;               // limitCh の直前まで移動
+    printf("(end-start) size is %ld\n", end - start);
+    size_t msz = (end - start) + 1;
+    char* str = (char*)malloc(sizeof(char)*msz);
+    memset(str, '\0', sizeof(char)*msz);
     size_t j = 0;
-    memset(json, '\0', 5121);
+    size_t jlimit = msz-1;
     while(1) {
-      json[j] = *start;
-      if(j >= 5120 || start == end) {
-        printf("%s\n", json);
+      str[j] = *start;
+      if(j >= jlimit || start == end) {
+        pushTree(_dest, str);
         break;
       }
       start++;
@@ -620,17 +622,32 @@ int test_search2nd() {
   
   H_TREE startPos = createTree();
   H_TREE endPos   = createTree();
+  H_TREE dest     = createTree();
   setRange(buf, startPos, endPos, startPattern, endPattern);
   if(isValidRange(startPos, endPos)) {
-    search2nd(startPos, endPos, 5);
+    search2nd(dest, startPos, endPos, 5);
+    H_TREE tmp = dest;
+    while((tmp = hasNext(tmp)) != NULL) {
+      char* str = getValue(tmp);          // BAD KNOW-HOW ここで pop してはいけない（理由が知りたければ試してみてくれ：）
+      printf("%s\n", str);
+      free((void*)str);
+    }
+    printf("dest count is %ld\n", countTree(dest));   // H_TREE は 根（root）分余計にある。実際の要素数 + 1 になる。
   }
   clearTree(startPos, countTree(startPos));
   clearTree(endPos, countTree(endPos));
+  clearTree(dest, countTree(dest));
   removeBuffer(buf);
   clock_t end_clock = clock();
   printf("clock: %lf (sec)\n", (double)(end_clock-start_clock)/CLOCKS_PER_SEC);
   return EXIT_SUCCESS;
 }
+
+/**
+  上記テスト関数で JSON の取得には成功したが、残念ながら、JSON フォーマットとしては正しくない。
+  興味があれば、正しい JSON フォーマットへの成形を考えてみる。ここまでやって何なんだが、最終的
+  に JSON が欲しいだけであれば、JavaScript の  Ajax 等の通信で充分だと思う。
+*/
 
 
 
