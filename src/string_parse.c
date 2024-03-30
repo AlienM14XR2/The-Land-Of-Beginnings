@@ -39,7 +39,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-
+#include <stdbool.h>
 
 
 /**
@@ -518,51 +518,6 @@ int test_searchProto() {
 */
 
 
-void search2nd(char* _buf, const char* _start_pattern, const char* _end_pattern, const char _limitCh) {
-  puts("------ search2nd");
-  if(_buf != NULL) {
-    size_t ptnSize  = strlen( _start_pattern);
-    char* start     = &_buf[0];
-    char* hitPos    = NULL;
-    H_TREE root     = createTree();
-    size_t hitCount = 0;
-    // 検索文字（パターン）に該当する箇所（アドレス）の取得    
-    do {
-      hitPos = strstr(start, _start_pattern);
-      if(hitPos != NULL) {
-        hitPos += ptnSize;
-        pushTree(root, hitPos);
-        start = hitPos + 1;
-        hitCount++;
-      }
-    } while(hitPos != NULL);
-    debug_long("hitCount is ", &hitCount);
-    // 実際の値を _limitCh 以前で取得する
-    H_TREE tmp     = root;
-    char url[1025] = "\0";                // 次のステップは、これを返却する仕組みが必要（H_TREE の value その動的メモリでいけるかな、解放忘れ怖いな：）。
-    int i = 0;
-    while((tmp = hasNext(tmp)) != NULL) {
-      char* searchPos = (char*)getValue(tmp);
-      memset(url, '\0', 1025);
-      i = 0;
-      while(1) {
-        if(*searchPos != _limitCh) {
-          url[i] = *searchPos;
-        }
-        if(i == 1024 || *searchPos == _limitCh) {
-          printf("%s\n", url);
-          break;
-        }
-        searchPos++;
-        i++;
-      }
-    }
-    printf("\n");    
-    clearTree(root, countTree(root));
-  } else {
-    printf("_buf is null.\n");
-  }
-}
 
 
 void setRange(char* _buf, H_TREE _startPositions, H_TREE _endPositions, const char* _startPattern, const char* _endPattern)
@@ -594,6 +549,53 @@ void setRange(char* _buf, H_TREE _startPositions, H_TREE _endPositions, const ch
   }
 }
 
+bool isValidRange(H_TREE _startPos, H_TREE _endPos) {
+  if( countTree(_startPos) == countTree(_endPos) ) {
+    puts("start end 個数は同じ");
+    H_TREE stmp = _startPos;
+    H_TREE etmp = _endPos;
+    while((stmp = hasNext(stmp)) != NULL) {
+      char* scp = (char*)getValue(stmp);
+      printf("%p\t%c", scp, *scp);
+      etmp = hasNext(etmp);
+      char* ecp = (char*)getValue(etmp);
+      printf("%p\t%c", ecp, *ecp);
+      if(scp >= ecp) {
+        printf("ERROR: addr ecp < scp");
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+void search2nd(H_TREE _startPos, H_TREE _endPos, char _beforeLimitPos) 
+{
+  puts("------ search2nd");
+  char* start      = NULL;
+  char* end        = NULL;
+  char  json[5121] = "\0";
+  memset(json, '\0', 5121);
+  size_t sz = countTree(_startPos);   // countTree() は 要素数 + 1 を返却する。 +1 は H_TREE の根（root）。  
+  debug_long("sz is ", &sz);
+  for(size_t i=0 ; i<(sz-1); i++) {
+    start    = (char*)popQueue(_startPos);
+    end      = (char*)popQueue(_endPos);
+    end += _beforeLimitPos;   // limitCh の直前まで移動
+    size_t j = 0;
+    memset(json, '\0', 5121);
+    while(1) {
+      json[j] = *start;
+      if(j >= 5120 || start == end) {
+        printf("%s\n", json);
+        break;
+      }
+      start++;
+      j++;
+    }
+  }
+}
 
 
 int test_search2nd() {
@@ -605,7 +607,7 @@ int test_search2nd() {
   readFile(FILE_PATH, buf);
   
   char startPattern[]    = "{\"videoRenderer\":";
-  char endPattern[]      = "\"}}}]},\"shortBylineText\"";
+  char endPattern[]      = "\"}}}]},\"shortBylineText\"";   // endPattern の中に必ず終端を表現する文字があること。この場合は ','
   printf("startPattern is \t%s\n", startPattern);
   printf("endPattern   is \t%s\n", endPattern);
     
@@ -619,44 +621,8 @@ int test_search2nd() {
   H_TREE startPos = createTree();
   H_TREE endPos   = createTree();
   setRange(buf, startPos, endPos, startPattern, endPattern);
-  if( countTree(startPos) == countTree(endPos) ) {
-    puts("start end 個数は同じ");
-    H_TREE stmp = startPos;
-    H_TREE etmp = endPos;
-    while((stmp = hasNext(stmp)) != NULL) {
-      char* scp = (char*)getValue(stmp);
-      printf("%p\t%c", scp, *scp);
-      etmp = hasNext(etmp);
-      char* ecp = (char*)getValue(etmp);
-      printf("%p\t%c", ecp, *ecp);
-      if(scp >= ecp) {
-        printf("ERROR: addr ecp < scp");
-        exit(1);
-      }
-    }
-  }
-  char* start      = NULL;
-  char* end        = NULL;
-//  char  limitCh    = ',';
-  char  json[5121] = "\0";
-  memset(json, '\0', 5121);
-  size_t sz = countTree(startPos);
-  debug_long("sz is ", &sz);
-  for(size_t i=0 ; i<(sz-1); i++) {
-    start    = (char*)popQueue(startPos);
-    end      = (char*)popQueue(endPos);
-    end += 5;   // limitCh の位置まで移動
-    size_t j = 0;
-    memset(json, '\0', 5121);
-    while(1) {
-      json[j] = *start;
-      if(j >= 5120 || start == end) {
-        printf("%s\n", json);
-        break;
-      }
-      start++;
-      j++;
-    }
+  if(isValidRange(startPos, endPos)) {
+    search2nd(startPos, endPos, 5);
   }
   clearTree(startPos, countTree(startPos));
   clearTree(endPos, countTree(endPos));
