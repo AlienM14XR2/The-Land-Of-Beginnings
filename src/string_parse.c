@@ -38,7 +38,7 @@
 #include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
-
+#include <time.h>
 
 
 
@@ -316,16 +316,16 @@ int test_Create_Remove_Buf() {
 void readFile(const char* _filePath, char* _buf) {
   puts("--- readFile");
   FILE*  fp          = NULL;
-  char   tmp[2048+1] = "\0";
+  char   tmp[10241] = "\0";
   size_t readSize    = 0;
     
   fp = fopen(_filePath, "r");
   if(fp != NULL) {    
     // ファイルの読み込みとメモリへの書き込み
-    memset(tmp, '\0', 2048+1);
-    while((readSize = fread(tmp, 1, 2048, fp)) != 0) {
+    memset(tmp, '\0', 10241);
+    while((readSize = fread(tmp, 1, 10240, fp)) != 0) {
       strcat(_buf, tmp);
-      memset(tmp, '\0', 2048+1);  // この一行がなく、初期化できていなかったのが原因だった。
+      memset(tmp, '\0', 10241);  // この一行がなく、初期化できていなかったのが原因だった。
     }
     printf("\n");
     fclose(fp);
@@ -564,13 +564,41 @@ void search2nd(char* _buf, const char* _start_pattern, const char* _end_pattern,
   }
 }
 
-struct range {
-  char* start;
-  char* end;
-};
+
+void setRange(char* _buf, H_TREE _startPositions, H_TREE _endPositions, const char* _startPattern, const char* _endPattern)
+{
+  puts("------ setRange");
+  if(_buf != NULL) {
+    char*  start     = &_buf[0];
+    char*  hitPos    = NULL;
+    // 先頭検索文字（パターン）に該当する箇所（アドレス）の取得
+    do {
+      hitPos = strstr(start, _startPattern);
+      if(hitPos != NULL) {
+        pushTree(_startPositions, hitPos);
+        start = hitPos + 1;
+      }
+    } while(hitPos != NULL);
+    // 終端検索文字（パターン）に該当する箇所（アドレス）の取得 
+    start     = &_buf[0];
+    hitPos    = NULL;
+    do {
+      hitPos = strstr(start, _endPattern);
+      if(hitPos != NULL) {
+        pushTree(_endPositions, hitPos);
+        start = hitPos + 1;
+      }
+    } while(hitPos != NULL);
+  } else {
+    printf("_buf is null.\n");
+  }
+}
+
+
 
 int test_search2nd() {
   puts("=== test_search2nd");
+  clock_t start_clock = clock();
   size_t size = getFileSize(FILE_PATH);
   char* buf = (char*)malloc(size+1);
   memset(buf, '\0', size+1);
@@ -580,15 +608,61 @@ int test_search2nd() {
   char endPattern[]      = "\"}}}]},\"shortBylineText\"";
   printf("startPattern is \t%s\n", startPattern);
   printf("endPattern   is \t%s\n", endPattern);
-  
+    
   /**
     search2nd() を実装するにあたり、最初に validation を行う必要がこれはある。
       そもそもが「ヤマカン」であるため、設定するパラメータで正しく機能する保証がないから（JSON として正しいこととは別の話）。
       - 最低限、_startPattern と _endPattern でヒットする数が同じこと。
-      - 各 start と end の組み合わせにおいて、アドレスが start < end であること。
+      - 各 start と end の組み合わせにおいて、アドレスが start < end であること（start >= end は NG）。
   */
   
+  H_TREE startPos = createTree();
+  H_TREE endPos   = createTree();
+  setRange(buf, startPos, endPos, startPattern, endPattern);
+  if( countTree(startPos) == countTree(endPos) ) {
+    puts("start end 個数は同じ");
+    H_TREE stmp = startPos;
+    H_TREE etmp = endPos;
+    while((stmp = hasNext(stmp)) != NULL) {
+      char* scp = (char*)getValue(stmp);
+      printf("%p\t%c", scp, *scp);
+      etmp = hasNext(etmp);
+      char* ecp = (char*)getValue(etmp);
+      printf("%p\t%c", ecp, *ecp);
+      if(scp >= ecp) {
+        printf("ERROR: addr ecp < scp");
+        exit(1);
+      }
+    }
+  }
+  char* start      = NULL;
+  char* end        = NULL;
+//  char  limitCh    = ',';
+  char  json[5121] = "\0";
+  memset(json, '\0', 5121);
+  size_t sz = countTree(startPos);
+  debug_long("sz is ", &sz);
+  for(size_t i=0 ; i<(sz-1); i++) {
+    start    = (char*)popQueue(startPos);
+    end      = (char*)popQueue(endPos);
+    end += 5;   // limitCh の位置まで移動
+    size_t j = 0;
+    memset(json, '\0', 5121);
+    while(1) {
+      json[j] = *start;
+      if(j >= 5120 || start == end) {
+        printf("%s\n", json);
+        break;
+      }
+      start++;
+      j++;
+    }
+  }
+  clearTree(startPos, countTree(startPos));
+  clearTree(endPos, countTree(endPos));
   removeBuffer(buf);
+  clock_t end_clock = clock();
+  printf("clock: %lf (sec)\n", (double)(end_clock-start_clock)/CLOCKS_PER_SEC);
   return EXIT_SUCCESS;
 }
 
