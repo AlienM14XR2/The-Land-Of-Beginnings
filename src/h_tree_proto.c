@@ -43,7 +43,7 @@ H_TREE createTree() {
 /**
     ツリーハンドラの次の値を返却する。
 */
-H_TREE hasNext(H_TREE _tree) {
+H_TREE hasNextTree(H_TREE _tree) {
   return (H_TREE)((struct tree*)_tree)->next;
 }
 
@@ -74,7 +74,7 @@ size_t countTree(H_TREE _root) {
   puts("--------- countTree");
   struct tree* current = (struct tree*)_root;
   size_t i = 0;
-  while((current = hasNext(current)) != NULL) {
+  while((current = hasNextTree(current)) != NULL) {
     i++;
   }
   i += 1;     // これは root も含めて返却している。
@@ -93,7 +93,7 @@ void clearTree(H_TREE _root, size_t count) {  // このことは「肝に銘じ�
   struct tree* current = (struct tree*)_root;
   array[0] = current;
   size_t i = 1;
-  while((current = hasNext(current)) != NULL) {
+  while((current = hasNextTree(current)) != NULL) {
     array[i] = current;
     i++;
   }
@@ -122,8 +122,8 @@ H_TREE pushTree(H_TREE _root, void* value) {
   return (H_TREE)pt;
 }
 
-void* getValue(H_TREE current) {
-  puts("--------- getValue");
+void* getTreeValue(H_TREE current) {
+  puts("--------- getTreeValue");
   if(current != NULL) {
     return ((struct tree*)current)->value;
   } else {
@@ -153,7 +153,7 @@ void* popStack(H_TREE _root) {
     free((void*)last);
   } 
   else {
-    while((current = (H_TREE)hasNext((H_TREE)current)) != NULL) {
+    while((current = (H_TREE)hasNextTree((H_TREE)current)) != NULL) {
       if( ((struct tree*)current)->next == last ) {
 //        printf("------------ SAME\n");
         value = last->value;
@@ -183,6 +183,12 @@ void* popQueue(H_TREE _root) {
   }
   return value;
 }
+
+
+
+
+
+
 
 
 
@@ -220,6 +226,91 @@ int test_debug_prints() {
   return EXIT_SUCCESS;
 }
 
+int test_H_TREE_basic_usage_stack() {
+  puts("=== test_H_TREE_basic_usage_stack");
+  H_TREE root = createTree();
+  
+  int n1 = 3;
+  pushTree(root, &n1);
+  int n2 = 6;
+  pushTree(root, &n2);
+  int n3 = 9;
+  pushTree(root, &n3);
+  
+  H_TREE tmp = root;
+  while((tmp = hasNextTree(tmp)) != NULL) {
+    int* rn = (int*)getTreeValue(tmp);
+    debug_int("rn is ", rn);
+  }
+  
+  int* pn = NULL; 
+  pn = (int*)popStack(root);
+  if(pn != NULL) {
+    debug_int("pn is ", pn);
+  }
+  pn = (int*)popStack(root);
+  if(pn != NULL) {
+    debug_int("pn is ", pn);
+  }
+  pn = (int*)popStack(root);
+  if(pn != NULL) {
+    debug_int("pn is ", pn);
+  }
+  pn = (int*)popStack(root);
+  if(pn != NULL) {
+    debug_int("pn is ", pn);
+  } else {
+    printf("pn is NULL.\n");
+  }
+  size_t size = countTree(root);
+  assert(size == 1);
+  debug_long("size is ", &size);
+  clearTree(root, size);
+  return EXIT_SUCCESS;
+}
+
+int test_H_TREE_basic_usage_queue() {
+  puts("=== test_H_TREE_basic_usage_queue");
+  H_TREE root = createTree();
+  
+  int n1 = 3;
+  pushTree(root, &n1);
+  int n2 = 6;
+  pushTree(root, &n2);
+  int n3 = 9;
+  pushTree(root, &n3);
+  
+  H_TREE tmp = root;
+  while((tmp = hasNextTree(tmp)) != NULL) {
+    int* rn = (int*)getTreeValue(tmp);
+    debug_int("rn is ", rn);
+  }
+  
+  int* pn = NULL; 
+  pn = (int*)popQueue(root);
+  if(pn != NULL) {
+    debug_int("pn is ", pn);
+  }
+  pn = (int*)popQueue(root);
+  if(pn != NULL) {
+    debug_int("pn is ", pn);
+  }
+  pn = (int*)popQueue(root);
+  if(pn != NULL) {
+    debug_int("pn is ", pn);
+  }
+  pn = (int*)popQueue(root);
+  if(pn != NULL) {
+    debug_int("pn is ", pn);
+  } else {
+    printf("pn is NULL.\n");
+  }
+  size_t size = countTree(root);
+  assert(size == 1);
+  debug_long("size is ", &size);
+  clearTree(root, size);
+  return EXIT_SUCCESS;
+}
 
 
 int main(void) {
@@ -228,7 +319,14 @@ int main(void) {
     int ret = 0;
     printf("Play and Result ... \t%d\n", ret = test_debug_prints());
     assert(ret == 0);
-  }  
+  }
+  if(1.00) {
+    int ret = 0;
+    printf("Play and Result ... \t%d\n", ret = test_H_TREE_basic_usage_stack());
+    assert(ret == 0);
+    printf("Play and Result ... \t%d\n", ret = test_H_TREE_basic_usage_queue());
+    assert(ret == 0);
+  }
   puts("===   H_TREE のブラッシュアップとその動作確認  END");
   return 0;
 }
