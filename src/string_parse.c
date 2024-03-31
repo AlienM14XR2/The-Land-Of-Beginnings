@@ -47,7 +47,7 @@
   
   void* を利用したものを考えてみる。
     データ構造は  value と next で表現できるはず。
-  add() で追加、remove() で削除する。
+  push() で追加、pop() で削除する。
 */
 
 struct tree {
@@ -94,6 +94,9 @@ H_TREE moveLast(H_TREE _tree) {
 
 /**
     ツリーハンドラの要素数と根の合計数を返却する。
+    根（root）は要素を持たないツリーだが、countTree() は根も
+    含めてそのサイズを返却する。つまり、その値は根 + 要素数と
+    なる。
 */
 size_t countTree(H_TREE _root) {
   puts("--------- countTree");
