@@ -31,7 +31,7 @@
   https://brightdata.com/blog/how-tos/web-scraping-in-c-plus-plus#libraries
   
   e.g. compile
-  gcc -O3 -DDEBUG -std=c17 -pedantic-errors -Wall -Werror string_parse.c -o ../bin/main
+  gcc -O3 -DDEBUG -std=c17 -pedantic-errors -Wall -Werror -I../inc/ h_tree.c string_parse.c -o ../bin/main
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,185 +41,7 @@
 #include <time.h>
 #include <stdbool.h>
 
-
-/**
-  Linked List 
-  
-  void* を利用したものを考えてみる。
-    データ構造は  value と next で表現できるはず。
-  push() で追加、pop() で削除する。
-*/
-
-struct tree {
-  void* value;
-  struct tree* next;
-};
-
-typedef void* H_TREE;
-
-/**
-    ツリーハンドラの作成。
-*/
-H_TREE createTree() {
-  puts("--------- createTree");
-  struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
-  pt->value = NULL;
-  pt->next = NULL;
-  return (H_TREE)pt;
-}
-
-/**
-    ツリーハンドラの次の値を返却する。
-*/
-H_TREE hasNext(H_TREE _tree) {
-  return (H_TREE)((struct tree*)_tree)->next;
-}
-
-/**
-    ツリーハンドラのポインタを最後尾に移動する。
-*/
-H_TREE moveLast(H_TREE _tree) {
-  puts("--------- moveLast");
-  struct tree* last = (struct tree*)_tree;
-  while(last != NULL) {
-    if(last->next != NULL) {
-      last = last->next;
-    } else {
-      break;
-    }
-  }
-//  printf("last addr is \t%p\n", (void*)last);
-  return (H_TREE)last;
-}
-
-/**
-    ツリーハンドラの要素数と根の合計数を返却する。
-    根（root）は要素を持たないツリーだが、countTree() は根も
-    含めてそのサイズを返却する。つまり、その値は根 + 要素数と
-    なる。
-*/
-size_t countTree(H_TREE _root) {
-  puts("--------- countTree");
-  struct tree* current = (struct tree*)_root;
-  size_t i = 0;
-  while((current = hasNext(current)) != NULL) {
-    i++;
-  }
-  i += 1;     // これは root も含めて返却している。
-  return i;
-}
-
-/**
-    ツリーハンドラの全要素の削除を行う。
-    根も削除する。
-    ※ もし、H_TREE が管理する value が動的にメモリ確保されたもので、H_TREE 以外そのアドレスを知り得ない場合
-    この関数を value 解放前に行うとメモリリークを引き起こす：）
-*/
-void clearTree(H_TREE _root, size_t count) {  // このことは「肝に銘じよ」C 言語では削除する対象のサイズを先に計算しろ。
-  puts("--------- clearTree");
-  H_TREE array[count];    // この配列の宣言のやり方は GCC 以外でもできるのかな？ 添字に変数を利用しているんだよね。
-  struct tree* current = (struct tree*)_root;
-  array[0] = current;
-  size_t i = 1;
-  while((current = hasNext(current)) != NULL) {
-    array[i] = current;
-    i++;
-  }
-  for(i=0; i<count; i++ ) {
-//    puts("------------ D");
-    free(array[i]);
-  }
-}
-
-/**
-    ツリーハンドラに値を追加する。
-*/
-H_TREE pushTree(H_TREE _root, void* value) {
-  puts("--------- pushTree");
-  struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
-  pt->value = value;
-  pt->next = NULL;
-  struct tree* last = (struct tree*)moveLast(_root);
-  if(last == (struct tree*)_root) {
-//      printf("------------ SAME\n");    
-    ((struct tree*)_root)->next = pt;
-  } else {
-    last->next = pt;
-  }
-//  printf("pt addr is \t%p\n", (void*)pt);
-  return (H_TREE)pt;
-}
-
-void* getValue(H_TREE current) {
-  puts("--------- getValue");
-  if(current != NULL) {
-    return ((struct tree*)current)->value;
-  } else {
-    return NULL;
-  }
-}
-
-/**
-    最後尾にある値の取り出しとそのツリーハンドラの削除を行う。
-  Stack と同じ動作、最初にツリーハンドラに登録した値は、最後に取り出される（First-in Last-out）。
-*/
-void* popStack(H_TREE _root) {
-  puts("--------- popStack");
-  // 前方アドレスの付け替え後、削除する。
-  void* value = NULL;
-  struct tree* last     = (struct tree*)moveLast(_root);
-  struct tree* current  = (struct tree*)_root;
-  if(current == last) {
-    // ignore
-    return NULL;
-  } 
-  else
-  if(current->next == last) {
-//    printf("------------ F2 SAME\n");
-    value = last->value;
-    current->next = NULL;
-    free((void*)last);
-  } 
-  else {
-    while((current = (H_TREE)hasNext((H_TREE)current)) != NULL) {
-      if( ((struct tree*)current)->next == last ) {
-//        printf("------------ SAME\n");
-        value = last->value;
-        ((struct tree*)current)->next = NULL;
-        free((void*)last);
-        break;
-      }
-    }
-  }
-  return value;
-}
-
-/**
-    起点の次、仮の先頭の値の取り出しとそのツリーハンドラの削除を行う。
-  queue と同じ動作（First-in First-out）。
-*/
-void* popQueue(H_TREE _root) {
-  puts("--------- popQueue");
-  // 先頭の ツリーハンドラは起点なので無視する
-  // 2 番目が対象であり、3 番目がある場合はそのアドレスを起点の next に代入する
-  void* value = NULL;
-  struct tree* second = ((struct tree*)_root)->next;
-  if(second != NULL) {
-    value                       = second->value;
-    ((struct tree*)_root)->next = second->next;
-    free((void*)second);
-  }
-  return value;
-}
-
-
-
-
-
-
-
-
-
+#include "h_tree.h"
 
 
 
@@ -410,8 +232,8 @@ int test_readFile() {
     H_TREE tmp    = root;
     char url[1025] = "\0";
     int i = 0;
-    while((tmp = hasNext(tmp)) != NULL) {
-      char* searchPos = (char*)getValue(tmp);
+    while((tmp = hasNextTree(tmp)) != NULL) {
+      char* searchPos = (char*)treeValue(tmp);
       memset(url, '\0', 1025);
       i = 0;
       while(1) {
@@ -472,9 +294,9 @@ void searchProto(H_TREE _dest, size_t _destSize, char* _buf, const char* _patter
     H_TREE tmp     = root;
     size_t i = 0;
     size_t limitSize = ((sizeof(char))*_destSize) - 1;
-    while((tmp = hasNext(tmp)) != NULL) {
+    while((tmp = hasNextTree(tmp)) != NULL) {
       char* str = (char*)malloc((sizeof(char))*_destSize);  // char は 1 byte だけどね。
-      char* searchPos = (char*)getValue(tmp);
+      char* searchPos = (char*)treeValue(tmp);
       memset(str, '\0', (sizeof(char))*_destSize);
       i = 0;
       while(1) {
@@ -509,8 +331,8 @@ int test_searchProto() {
   H_TREE t1 = createTree();
   searchProto(t1, strSize, buf, pattern, '"');
   tmp = t1;
-  while((tmp = hasNext(tmp)) != NULL) {
-    char* str = (char*)getValue(tmp);
+  while((tmp = hasNextTree(tmp)) != NULL) {
+    char* str = (char*)treeValue(tmp);
     printf("%s\n", str);
     free((void*)str);
   }
@@ -518,8 +340,8 @@ int test_searchProto() {
   H_TREE t2 = createTree();
   searchProto(t2, strSize, buf, pattern_2, '"');
   tmp = t2;
-  while((tmp = hasNext(tmp)) != NULL) {
-    char* str = (char*)getValue(tmp);
+  while((tmp = hasNextTree(tmp)) != NULL) {
+    char* str = (char*)treeValue(tmp);
     printf("%s\n", str);
     free((void*)str);
   }
@@ -577,11 +399,11 @@ bool isValidRange(H_TREE _startPos, H_TREE _endPos) {
     puts("start end 個数は同じ");
     H_TREE stmp = _startPos;
     H_TREE etmp = _endPos;
-    while((stmp = hasNext(stmp)) != NULL) {
-      char* scp = (char*)getValue(stmp);
+    while((stmp = hasNextTree(stmp)) != NULL) {
+      char* scp = (char*)treeValue(stmp);
       printf("%p\t%c", scp, *scp);
-      etmp = hasNext(etmp);
-      char* ecp = (char*)getValue(etmp);
+      etmp = hasNextTree(etmp);
+      char* ecp = (char*)treeValue(etmp);
       printf("%p\t%c", ecp, *ecp);
       if(scp >= ecp) {
         printf("ERROR: addr ecp < scp");
@@ -650,8 +472,8 @@ int test_search2nd() {
   if(isValidRange(startPos, endPos)) {
     search2nd(dest, startPos, endPos, 5);
     H_TREE tmp = dest;
-    while((tmp = hasNext(tmp)) != NULL) {
-      char* str = getValue(tmp);          // BAD KNOW-HOW ここで pop してはいけない（理由が知りたければ試してみてくれ：）
+    while((tmp = hasNextTree(tmp)) != NULL) {
+      char* str = treeValue(tmp);          // BAD KNOW-HOW ここで pop してはいけない（理由が知りたければ試してみてくれ：）
       printf("%s\n", str);
       free((void*)str);
     }
