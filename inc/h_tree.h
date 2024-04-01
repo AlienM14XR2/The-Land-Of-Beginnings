@@ -18,6 +18,10 @@ typedef void* H_TREE;
 
 /**
     ツリーハンドラの作成。
+    内部で struct tree を動的作成（malloc）している。
+    利用後は必ず、clearTree() を使用すること。
+    tree.value に設定する値は自由で、動的に取得したメモリでも構わないが
+    その解放は、ツリーハンドラでは行わないので注意が必要。  
 */
 H_TREE createTree();
 
