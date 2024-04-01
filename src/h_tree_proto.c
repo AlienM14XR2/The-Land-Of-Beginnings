@@ -36,11 +36,15 @@ H_TREE createTree();
 
 /**
     ツリーハンドラの次の値を返却する。
+  
+  _tree： カレントツリー
 */
 H_TREE hasNextTree(H_TREE _tree);
 
 /**
     ツリーハンドラのポインタを最後尾に移動する。
+  
+  _tree： カレントツリー
 */
 H_TREE moveLast(H_TREE _tree);
 
@@ -49,6 +53,8 @@ H_TREE moveLast(H_TREE _tree);
     根（root）は要素を持たないツリーだが、countTree() は根も
     含めてそのサイズを返却する。つまり、その値は根 + 要素数と
     なる。
+  
+  _root： ルートツリー
 */
 size_t countTree(H_TREE _root);
 
@@ -57,25 +63,40 @@ size_t countTree(H_TREE _root);
     根も削除する。
     ※ もし、H_TREE が管理する value が動的にメモリ確保されたもので、H_TREE 以外そのアドレスを知り得ない場合
     この関数を value 解放前に行うとメモリリークを引き起こす：）
+  
+  _root： ルートツリー
+  count： ルートツリーを含めた、全要素数
 */
 void clearTree(H_TREE _root, size_t count);
 
 /**
     ツリーハンドラに値を追加する。
+  
+  _root： ルートツリー
+  value： ツリーに追加する値
 */
 H_TREE pushTree(H_TREE _root, void* value);
 
-void* treeValue(H_TREE current);
+/**
+    ツリーハンドラに設定した値の取得。
+  
+  _current： カレントツリー
+*/
+void* treeValue(H_TREE _current);
 
 /**
     最後尾にある値の取り出しとそのツリーハンドラの削除を行う。
   Stack と同じ動作、最初にツリーハンドラに登録した値は、最後に取り出される（First-in Last-out）。
+  
+  _root： ルートツリー
 */
 void* popStack(H_TREE _root);
 
 /**
     起点の次、仮の先頭の値の取り出しとそのツリーハンドラの削除を行う。
   queue と同じ動作（First-in First-out）。
+    
+  _root： ルートツリー
 */
 void* popQueue(H_TREE _root);
 
@@ -282,10 +303,10 @@ void clearTree(H_TREE _root, size_t count) {  // このことは「肝に銘じ�
   }
 }
 
-H_TREE pushTree(H_TREE _root, void* value) {
+H_TREE pushTree(H_TREE _root, void* _value) {
   puts("--------- pushTree");
   struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
-  pt->value = value;
+  pt->value = _value;
   pt->next = NULL;
   struct tree* last = (struct tree*)moveLast(_root);
   if(last == (struct tree*)_root) {
@@ -298,10 +319,10 @@ H_TREE pushTree(H_TREE _root, void* value) {
   return (H_TREE)pt;
 }
 
-void* treeValue(H_TREE current) {
+void* treeValue(H_TREE _current) {
   puts("--------- treeValue");
-  if(current != NULL) {
-    return ((struct tree*)current)->value;
+  if(_current != NULL) {
+    return ((struct tree*)_current)->value;
   } else {
     return NULL;
   }
