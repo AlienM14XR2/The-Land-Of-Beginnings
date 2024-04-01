@@ -251,7 +251,7 @@ int main(void) {
 
 
 H_TREE createTree() {
-  puts("--------- createTree");
+//  puts("--------- createTree");
   struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
   pt->value = NULL;
   pt->next = NULL;
@@ -263,7 +263,7 @@ H_TREE hasNextTree(H_TREE _tree) {
 }
 
 H_TREE moveLast(H_TREE _tree) {
-  puts("--------- moveLast");
+//  puts("--------- moveLast");
   struct tree* last = (struct tree*)_tree;
   while(last != NULL) {
     if(last->next != NULL) {
@@ -277,7 +277,7 @@ H_TREE moveLast(H_TREE _tree) {
 }
 
 size_t countTree(H_TREE _root) {
-  puts("--------- countTree");
+//  puts("--------- countTree");
   struct tree* current = (struct tree*)_root;
   size_t i = 0;
   while((current = hasNextTree(current)) != NULL) {
@@ -288,7 +288,7 @@ size_t countTree(H_TREE _root) {
 }
 
 void clearTree(H_TREE _root, size_t count) {  // このことは「肝に銘じよ」C 言語では削除する対象のサイズを先に計算しろ。
-  puts("--------- clearTree");
+//  puts("--------- clearTree");
   H_TREE array[count];    // この配列の宣言のやり方は GCC 以外でもできるのかな？ 添字に変数を利用しているんだよね。
   struct tree* current = (struct tree*)_root;
   array[0] = current;
@@ -304,7 +304,7 @@ void clearTree(H_TREE _root, size_t count) {  // このことは「肝に銘じ�
 }
 
 H_TREE pushTree(H_TREE _root, void* _value) {
-  puts("--------- pushTree");
+//  puts("--------- pushTree");
   struct tree* pt = (struct tree*)malloc(sizeof(struct tree));
   pt->value = _value;
   pt->next = NULL;
@@ -320,7 +320,7 @@ H_TREE pushTree(H_TREE _root, void* _value) {
 }
 
 void* treeValue(H_TREE _current) {
-  puts("--------- treeValue");
+//  puts("--------- treeValue");
   if(_current != NULL) {
     return ((struct tree*)_current)->value;
   } else {
@@ -329,7 +329,7 @@ void* treeValue(H_TREE _current) {
 }
 
 void* popStack(H_TREE _root) {
-  puts("--------- popStack");
+//  puts("--------- popStack");
   // 前方アドレスの付け替え後、削除する。
   void* value = NULL;
   struct tree* last     = (struct tree*)moveLast(_root);
