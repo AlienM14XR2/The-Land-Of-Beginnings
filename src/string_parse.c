@@ -395,6 +395,7 @@ void setRange(char* _buf, H_TREE _startPositions, H_TREE _endPositions, const ch
 }
 
 bool isValidRange(H_TREE _startPos, H_TREE _endPos) {
+  puts("------ isValidRange");
   if( countTree(_startPos) == countTree(_endPos) ) {
     puts("start end 個数は同じ");
     H_TREE stmp = _startPos;
@@ -413,6 +414,20 @@ bool isValidRange(H_TREE _startPos, H_TREE _endPos) {
     return true;
   }
   return false;
+}
+
+void checkChar(const char* _src, const char _start, const char _end, size_t* _startCount, size_t* _endCount) {
+  puts("------ checkChar");
+  size_t len = strlen(_src);
+  printf("_src size is %ld\n", len);
+  for(size_t i=0; i<len ;i++) {
+    if(_src[i] == _start) {
+      (*_startCount)++;
+    }
+    else if(_src[i] == _end) {
+      (*_endCount)++;
+    }
+  }
 }
 
 void search2nd(H_TREE _dest, H_TREE _startPos, H_TREE _endPos, char _beforeLimitPos) 
@@ -475,6 +490,21 @@ int test_search2nd() {
     while((tmp = hasNextTree(tmp)) != NULL) {
       char* str = treeValue(tmp);          // BAD KNOW-HOW ここで pop してはいけない（理由が知りたければ試してみてくれ：）
       printf("%s\n", str);
+//      printf("str size is %ld\n", strlen(str));
+      /**
+                簡易 valid JSON を考えてみる。
+        {} の数が同じ、[] の数が同じ、それぞれの位置の問題。
+        endPattern から、{} の数だけに注目すればいいと思う、各括弧の位置については考慮しない（それは元データが間違っている）。
+        
+                 単一責務の原則と処理速度の問題。
+                 これは正直悩ましいが原則に従うならば、特定の文字列の Parse とそれが任意のフォーマットに適合するか否かとは分けて考えるべきだ
+                 と思う。したがってここでフォーマット適合に関する処理を行う。
+      */
+      size_t s = 0;
+      size_t e = 0;
+      checkChar(str, '{', '}', &s, &e);
+      debug_long("s is ", &s);
+      debug_long("e is ", &e);
       free((void*)str);
     }
     printf("dest count is %ld\n", countTree(dest));   // H_TREE は 根（root）分余計にある。実際の要素数 + 1 になる。
