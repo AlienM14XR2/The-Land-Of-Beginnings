@@ -430,6 +430,23 @@ void checkChar(const char* _src, const char _start, const char _end, size_t* _st
   }
 }
 
+void appendTop(H_TREE _dest, const char* _src, const char* _append, const size_t _chCount) {
+  puts("------ appendTop");
+  // C 言語での文字列操作、その際のサイズ計算は面倒だし、多少サイズに余裕を持たせるようにする（ヌル文字を忘れる：）。  
+  size_t size = strlen(_src) + (strlen(_append) * 2)+1;
+  printf("size is %ld\n", size);
+  char* str = (char*)malloc(sizeof(char)*size);
+  memset(str, '\0', sizeof(char)*size);
+  for(size_t i=0; i<_chCount; i++) {
+    strcat(str, _append);
+  }
+  strcat(str, _src);
+  pushTree(_dest, str);
+}
+
+void appendBottom() {
+}
+
 void search2nd(H_TREE _dest, H_TREE _startPos, H_TREE _endPos, char _beforeLimitPos) 
 {
   puts("------ search2nd");
@@ -483,14 +500,15 @@ int test_search2nd() {
   H_TREE startPos = createTree();
   H_TREE endPos   = createTree();
   H_TREE dest     = createTree();
+  H_TREE fix      = createTree();
+  char append[] = "{";
   setRange(buf, startPos, endPos, startPattern, endPattern);
   if(isValidRange(startPos, endPos)) {
     search2nd(dest, startPos, endPos, 5);
     H_TREE tmp = dest;
     while((tmp = hasNextTree(tmp)) != NULL) {
       char* str = treeValue(tmp);          // BAD KNOW-HOW ここで pop してはいけない（理由が知りたければ試してみてくれ：）
-      printf("%s\n", str);
-//      printf("str size is %ld\n", strlen(str));
+//      printf("%s\n", str);
       /**
                 簡易 valid JSON を考えてみる。
         {} の数が同じ、[] の数が同じ、それぞれの位置の問題。
@@ -505,13 +523,21 @@ int test_search2nd() {
       checkChar(str, '{', '}', &s, &e);
       debug_long("s is ", &s);
       debug_long("e is ", &e);
+      appendTop(fix, str, append, 2);
       free((void*)str);
     }
-    printf("dest count is %ld\n", countTree(dest));   // H_TREE は 根（root）分余計にある。実際の要素数 + 1 になる。
+    tmp = fix;
+    while((tmp = hasNextTree(tmp)) != NULL) {
+      char* str = treeValue(tmp);
+      printf("str is %s\n", str);
+    }
+    printf("dest count is \t%ld\n", countTree(dest));   // H_TREE は 根（root）分余計にある。実際の要素数 + 1 になる。
+    printf("fix count is \t%ld\n", countTree(fix));   // H_TREE は 根（root）分余計にある。実際の要素数 + 1 になる。
   }
   clearTree(startPos, countTree(startPos));
   clearTree(endPos, countTree(endPos));
   clearTree(dest, countTree(dest));
+  clearTree(fix, countTree(fix));
   removeBuffer(buf);
   clock_t end_clock = clock();
   printf("clock: %lf (sec)\n", (double)(end_clock-start_clock)/CLOCKS_PER_SEC);
