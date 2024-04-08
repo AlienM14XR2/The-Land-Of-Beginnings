@@ -328,17 +328,8 @@ int test_searchProto() {
     e.g. 先頭の文字列 "{\"videoRenderer\"" 終端の文字列 "\"}}}]},\"shortBylineText\""
   上例のような形が JSON であるため。
   これを先に考えてみよう。
+  次のテスト関数が YouTube の必要情報のとり方のサンプルになる。
 */
-
-
-
-
-
-
-
-
-
-
 
 int test_search2nd() {
   puts("=== test_search2nd");
