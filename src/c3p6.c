@@ -23,11 +23,13 @@ void nine_nine() {
 }
 
 /**
- * 疑問：アルファベット（小文字のみ）と数値の全パターンの計算にどれくらいかかるのか？
+* 疑問：アルファベット（小文字のみ）と数値の全パターンの計算にどれくらいかかるのか？
+* 
+* 8 桁
 */
 
-void ptn_alpha_numeric() {
-    puts("--- ptn_alpha_numeric");
+void ptn_alpha_numeric_8() {
+    puts("--- ptn_alpha_numeric_8");
     /**
      * アスキーコードを利用した方がいいかな。
      * 並び順は忘れた：）
@@ -74,13 +76,69 @@ void ptn_alpha_numeric() {
     printf("\n");
 }
 
+
+void ptn_alpha_numeric_6() {
+    puts("--- ptn_alpha_numeric_6");
+    int kind[36] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+                97,  98,  99,  100, 101, 102, 103,
+                104, 105, 106, 107, 108, 109, 110,
+                111, 112, 113, 114, 115, 116, 117,
+                118, 119, 120, 121, 122 };
+    
+    for(int i=0; i<36; i++) {
+        for(int j=0; j<36; j++) {
+            for(int k=0; k<36; k++) {
+                for(int l=0; l<36; l++) {
+                    for(int m=0; m<36; m++) {
+                        for(int n=0; n<36; n++) {
+                            printf("%c\t%c\t%c\t%c\t%c\t%c\n",kind[i], kind[j], kind[k], kind[l], kind[m], kind[n]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void ptn_alpha_numeric_7() {
+    puts("--- ptn_alpha_numeric_7");
+    int kind[36] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+                97,  98,  99,  100, 101, 102, 103,
+                104, 105, 106, 107, 108, 109, 110,
+                111, 112, 113, 114, 115, 116, 117,
+                118, 119, 120, 121, 122 };
+    
+    for(int i=0; i<36; i++) {
+        for(int j=0; j<36; j++) {
+            for(int k=0; k<36; k++) {
+                for(int l=0; l<36; l++) {
+                    for(int m=0; m<36; m++) {
+                        for(int n=0; n<36; n++) {
+                            for(int o=0; o<36; o++) {
+                                printf("%c\t%c\t%c\t%c\t%c\t%c\t%c\n",kind[i], kind[j], kind[k], kind[l], kind[m], kind[n], kind[o]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 int main(void) {
     puts("START パターンの学習 ===");
     if(1.00) {
         nine_nine();    
     }
-    if(1.01) {
-        ptn_alpha_numeric();
+    if(0) {     // 1.01
+        // 次のものは 8 桁、最後まで実行させることが困難と判断した。
+        ptn_alpha_numeric_8();
+    }
+    if(0) {     // 1.02
+        ptn_alpha_numeric_6();
+    }
+    if(1.03) {
+        ptn_alpha_numeric_7();        
     }
     puts("=== パターンの学習   END");
 }
