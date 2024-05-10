@@ -125,6 +125,27 @@ void ptn_alpha_numeric_7() {
     }
 }
 
+void ptn_alpha_numeric_5() {
+    puts("--- ptn_alpha_numeric_5");
+    int kind[36] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+                97,  98,  99,  100, 101, 102, 103,
+                104, 105, 106, 107, 108, 109, 110,
+                111, 112, 113, 114, 115, 116, 117,
+                118, 119, 120, 121, 122 };
+    
+    for(int i=0; i<36; i++) {
+        for(int j=0; j<36; j++) {
+            for(int k=0; k<36; k++) {
+                for(int l=0; l<36; l++) {
+                    for(int m=0; m<36; m++) {
+                        printf("%c\t%c\t%c\t%c\t%c\n",kind[i], kind[j], kind[k], kind[l], kind[m]);
+                    }
+                }
+            }
+        }
+    }
+}
+
 int main(void) {
     puts("START パターンの学習 ===");
     if(1.00) {
@@ -137,8 +158,13 @@ int main(void) {
     if(0) {     // 1.02
         ptn_alpha_numeric_6();
     }
-    if(1.03) {
+    if(0) {     // 1.03
+        // 次のものは 7 桁、これもハードディスクの容量をオーバーしてしまう。
         ptn_alpha_numeric_7();        
     }
+    if(1.04) {      // 1.04
+        ptn_alpha_numeric_5();
+    }
+
     puts("=== パターンの学習   END");
 }
